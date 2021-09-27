@@ -1,0 +1,153 @@
+import asyncio
+import toml
+import os
+import random
+from rich.prompt import Confirm
+from rich.console import Console
+from multiprocessing import Process
+from telethon import events
+
+console = Console()
+
+
+class FloodFunc:
+    """Flood to chat"""
+
+    def __init__(self, storage):
+        self.storage = storage
+        self.sessions = storage.sessions
+
+        self.modes = (
+            ("Raid with text", self.text_flood),
+            ("Raid with media", self.gif_flood),
+            ("Raid with reply", self.reply_flood)
+        )
+
+        with open("config.toml") as f:
+            self.config = toml.load(f)["flood"]
+
+    async def text_flood(self, session, msg, text):
+        await session.send_message(
+            msg.chat_id,
+            text,
+            parse_mode="html"
+        )
+
+    async def reply_flood(self, session, msg, text):
+        await session.send_message(
+            msg.chat_id,
+            text,
+            reply_to=msg.reply_to.reply_to_msg_id,
+            parse_mode="html"
+        )
+
+    async def gif_flood(self, session, msg, text):
+        file = random.choice(os.listdir("media"))
+
+        await session.send_file(
+            msg.chat_id,
+            os.path.join("media", file),
+            caption=text,
+            parse_mode="html"
+        )
+
+    async def flood(self, session, msg, function):
+        if self.config["messages_count"] == 0:
+            self.config["messages_count"] = 900000000
+
+        users = []
+        count = 0
+
+        me = await session.get_me()
+
+        if self.mention_all:
+            async for user in session.iter_participants(msg.chat_id):
+                users.append(
+                    f'<a href="tg://user?id={user.id}">\u206c\u206f</a>'
+                )
+
+        for _ in range(self.config["messages_count"]):
+            if not self.mention_all:
+                text = random.choice(self.config["messages"])
+            else:
+                if function is not self.gif_flood:
+                    text = random.choice(self.config["messages"]) + \
+                        "\u206c\u206f".join(random.sample(users, 5))
+                else:
+                    text = random.choice(self.config["messages"]) + \
+                        "\u206c\u206f".join(random.sample(users, 2))
+
+            try:
+                await function(session, msg, text)
+            except Exception as err:
+                console.print(
+                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
+                    .format(name=me.first_name, err=err)
+                )
+            else:
+                count += 1
+                console.print(
+                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
+                    .format(name=me.first_name, count=count)
+                )
+            finally:
+                await asyncio.sleep(self.get_delay())
+
+    def get_delay(self):
+        if len(self.config["delay"]) == 1:
+            return self.config["delay"][0]
+        else:
+            return random.randint(*self.config["delay"])
+
+    def handle(self, session, function):
+        @session.on(events.NewMessage)
+        async def handler(msg):
+            if msg.raw_text == self.config["trigger"]:
+                await self.flood(session, msg, function)
+                return
+
+        if not self.storage.initialize:
+            session.start()
+
+        session.run_until_disconnected()
+
+    def execute(self):
+        for index, mode in enumerate(self.modes):
+            console.print(
+                "[bold white][{index}] {description}[/]"
+                .format(index=index + 1, description=mode[0]),
+            )
+
+        choice = console.input(
+            "[bold white]>> [/]"
+        )
+
+        while not choice.isdigit():
+            choice = console.input(
+                "[bold white]>> [/]"
+            )
+
+        else:
+            choice = int(choice) - 1
+
+        function = self.modes[choice][1]
+
+        self.mention_all = Confirm.ask("[bold red]mention all?[/]", default="y")
+
+        processes = []
+
+        for session in self.sessions:
+            process = Process(
+                target=self.handle, args=[session, function]
+            )
+
+            process.start()
+            processes.append(process)
+
+        console.print(
+            "[bold white][*] Send «[green]{trigger}[/]» to chat[/]"
+            .format(trigger=self.config["trigger"])
+        )
+
+        for process in processes:
+            process.join()

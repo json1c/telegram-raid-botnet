@@ -1,0 +1,11 @@
+[sessions]
+api_id = APIID
+api_hash = "APIHASH"
+[flood]
+messages = [
+    "@ huis_bn"
+]
+
+delay = [0]
+messages_count = 0
+trigger = "а"
