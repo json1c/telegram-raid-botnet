@@ -8,8 +8,8 @@ The raid botnet for Telegram
 
 - Добавить аккаунты
 
-```cd sessions
-python3 add_session.py НАЗВАНИЕ```
+`cd sessions`
+`python3 add_session.py НАЗВАНИЕ`
 
 - Добавить файлы в папку `media`
 - Отредактировать конфиг. Там все интуитивно понятно.
