@@ -1,3 +1,7 @@
+# This programm protected by GNU General Public License.
+# If you bought this program, then you were deceived.
+# https://github.com/json1c/telegram-raid-botnet
+
 import asyncio
 import importlib.util
 import inspect
