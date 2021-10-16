@@ -1,6 +1,15 @@
-# This programm protected by GNU General Public License.
-# If you bought this program, then you were deceived.
-# https://github.com/json1c/telegram-raid-botnet
+# https://github.com/json1c
+# Copyright (C) 2021  json1c
+
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of the License
+
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
 
 import toml
 from rich.console import Console
@@ -17,6 +26,11 @@ api_hash = config["api_hash"]
 
 sessions_storage = SessionsStorage("sessions", api_id, api_hash)
 functions_storage = FunctionsStorage("functions", sessions_storage)
+
+console.print("""
+[bold magenta]This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it under certain conditions.[/]
+""")
 
 console.print("[bold white]accounts count> %d[/]" % len(sessions_storage))
 
