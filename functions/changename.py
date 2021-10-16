@@ -35,11 +35,10 @@ class ChangeNameFunc:
             else:
                 last_name = ""
 
-            await session.connect()
-
-            await session(
-                UpdateProfileRequest(
-                    first_name=first_name,
-                    last_name=last_name
+            async with self.storage.ainitialize_session(session):
+                await session(
+                    UpdateProfileRequest(
+                        first_name=first_name,
+                        last_name=last_name
+                    )
                 )
-            )

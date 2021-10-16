@@ -19,8 +19,7 @@ class ChangeBioFunc:
         bio = console.input("[bold red]bio> [/]")
 
         for session in self.sessions:
-            await session.connect()
-
-            await session(
-                UpdateProfileRequest(about=bio)
-            )
+            async with self.storage.ainitialize_session(session):
+                await session(
+                    UpdateProfileRequest(about=bio)
+                )
