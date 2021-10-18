@@ -59,9 +59,16 @@ class JoinerFunc:
         session.run_until_disconnected()
 
     async def execute(self):
+        accounts_count = int(Prompt.ask(
+            "[bold magenta]how many accounts to use? [/]",
+            default=str(len(self.sessions))
+        ))
+
+        self.sessions = self.sessions[:accounts_count]
+
         link = Prompt.ask("[bold red]link[/]")
-        delay = Prompt.ask("[bold red]delay[/]", default=0)
-        captcha = Confirm.ask("[bold red]captcha?", default="n")
+        delay = Prompt.ask("[bold red]delay[/]", default="0")
+        captcha = Confirm.ask("[bold red]captcha?", default=False)
 
         if "t.me" in link:
             if "joinchat" in link:

@@ -14,6 +14,7 @@
 import random
 import toml
 import asyncio
+from rich.prompt import Prompt
 from rich.console import Console
 
 console = Console()
@@ -71,6 +72,13 @@ class CommentsFloodFunc:
                     )
 
     async def execute(self):
+        accounts_count = int(Prompt.ask(
+            "[bold magenta]how many accounts to use? [/]",
+            default=str(len(self.sessions))
+        ))
+
+        self.sessions = self.sessions[:accounts_count]
+
         link = console.input("[bold red]link to post> [/]")
 
         channel = "/" .join(link.split("/")[:-1])

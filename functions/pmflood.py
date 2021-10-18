@@ -12,6 +12,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+from rich.prompt import Prompt
 from rich.console import Console
 
 console = Console()
@@ -48,6 +49,13 @@ class PmFloodFunc:
                     await asyncio.sleep(delay)
 
     async def execute(self):
+        accounts_count = int(Prompt.ask(
+            "[bold magenta]how many accounts to use? [/]",
+            default=str(len(self.sessions))
+        ))
+
+        self.sessions = self.sessions[:accounts_count]
+
         peer = console.input("[bold red]enter uid or username> [/]")
         text = console.input("[bold red]text> [/]")
 

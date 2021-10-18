@@ -15,7 +15,7 @@ import asyncio
 import toml
 import os
 import random
-from rich.prompt import Confirm
+from rich.prompt import Prompt, Confirm
 from rich.console import Console
 from multiprocessing import Process
 from telethon import events
@@ -144,6 +144,13 @@ class FloodFunc:
             choice = int(choice) - 1
 
         function = self.modes[choice][1]
+
+        accounts_count = int(Prompt.ask(
+            "[bold magenta]how many accounts to use? [/]",
+            default=str(len(self.sessions))
+        ))
+
+        self.sessions = self.sessions[:accounts_count]
 
         self.mention_all = Confirm.ask("[bold red]mention all?[/]", default="y")
 
