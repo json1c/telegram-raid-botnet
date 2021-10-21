@@ -1,5 +1,4 @@
 # telegram-raid-botnet
-The raid botnet for Telegram
 
 ## Что нужно сделать перед запуском?
 - Установить модули
@@ -8,8 +7,12 @@ The raid botnet for Telegram
 
 - Добавить аккаунты
 
-`cd sessions`
-`python3 add_session.py НАЗВАНИЕ`
+`cd sessions
+python3 add_session.py`
 
 - Добавить файлы в папку `media`
-- Отредактировать конфиг. Там все интуитивно понятно.
+- Отредактировать `config.toml`
+
+#### Полезные материалы
+- https://tlgrm.ru/docs/api/obtaining_api_id
+- https://python-scripts.com/install-python
