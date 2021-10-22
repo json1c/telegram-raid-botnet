@@ -12,6 +12,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+import random
 from rich.prompt import Prompt
 from rich.console import Console
 
@@ -27,6 +28,7 @@ class PmFloodFunc:
 
     async def flood(self, session, peer, text, delay):
         count = 0
+        errors = 0
 
         async with self.storage.ainitialize_session(session):
             me = await session.get_me()
@@ -39,6 +41,11 @@ class PmFloodFunc:
                         "[{name}] [bold red]not sended.[/] {err}"
                         .format(name=me.first_name, err=err)
                     )
+
+                    if errors > 3:
+                        break
+                    
+                    errors += 1
                 else:
                     count += 1
                     console.print(
@@ -46,7 +53,15 @@ class PmFloodFunc:
                         .format(name=me.first_name, count=count)
                     )
                 finally:
-                    await asyncio.sleep(delay)
+                    await self.sleep()
+
+    async def sleep(self):
+        if isinstance(self.delay, list):
+            delay = random.randint(*self.delay)
+        else:
+            delay = self.delay
+
+        await asyncio.sleep(delay)
 
     async def execute(self):
         accounts_count = int(Prompt.ask(
@@ -59,9 +74,15 @@ class PmFloodFunc:
         peer = console.input("[bold red]enter uid or username> [/]")
         text = console.input("[bold red]text> [/]")
 
-        delay = float(
-            console.input("[bold red]delay> [/]")
-        )
+        delay = Prompt.ask(
+            "[bold red]delay[/]",
+            default="1-3"
+        ).split("-")
+
+        if len(delay) == 1:
+            self.delay = int(delay[0])
+        elif len(delay) == 2:
+            self.delay = [int(i) for i in delay]
 
         await asyncio.wait([
             self.flood(session, peer, text, delay)
