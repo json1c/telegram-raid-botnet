@@ -7,8 +7,8 @@
 
 - Добавить аккаунты
 
-`cd sessions
-python3 add_session.py`
+`cd sessions`<br>
+`python3 add_session.py`
 
 - Добавить файлы в папку `media`
 - Отредактировать `config.toml`
