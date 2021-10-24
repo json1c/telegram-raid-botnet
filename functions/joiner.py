@@ -73,7 +73,7 @@ class JoinerFunc:
         if "t.me" in link:
             if "joinchat" in link:
                 invite = link.split("/")[-1]
-           else:
+            else:
                 invite = "@" + link.split("/")[-1]
         elif link.startswith("@"):
             invite = link
