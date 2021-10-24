@@ -28,6 +28,8 @@ class FunctionsStorage:
                     file[:-3], os.path.join(directory, file)
                 )
 
+        self.functions.sort(key=lambda item: item[1].lower())
+
     def load_function(self, name: str, path: str):
         spec = importlib.util.spec_from_file_location(name, path)
         function = importlib.util.module_from_spec(spec)
