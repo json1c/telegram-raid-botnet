@@ -87,10 +87,6 @@ class ReportFunc:
                     )
                 except Exception as err:
                     console.print(
-                        "[{name}] [bold red]error.[/] {err}"
+                        "[{name}] [bold red]error.[/] {error}"
                         .format(name=me.first_name, error=err)
                     )
-
-
-            
-
