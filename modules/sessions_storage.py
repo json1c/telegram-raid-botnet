@@ -13,14 +13,14 @@
 
 import os
 from contextlib import contextmanager, asynccontextmanager
-from typing import List
+from typing import List, Dict
 from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
 
 
 class SessionsStorage:
     def __init__(self, directory, api_id, api_hash):
-        self.sessions: List[TelegramClient] = []
+        self.full_sessions: Dict[str, TelegramClient] = {}
 
         self.initialize = (
             True if input("Initialize sessions? (y/n) ") == "y"
@@ -37,7 +37,9 @@ class SessionsStorage:
                 session = TelegramClient(
                     StringSession(auth_key),
                     api_id,
-                    api_hash
+                    api_hash,
+                    lang_code="en",
+                    system_lang_code="en"
                 )
 
                 if self.initialize:
@@ -55,7 +57,16 @@ class SessionsStorage:
                         os.remove(os.path.join(directory, file))
                         continue
 
-                self.sessions.append(session)
+                self.full_sessions[session_path] = session
+
+    def get_session_path(self, session: TelegramClient) -> str:
+        for path, client in self.full_sessions.items():
+            if client == session:
+                return path
+
+    @property
+    def sessions(self) -> List[TelegramClient]:
+        return list(self.full_sessions.values())
 
     @contextmanager
     def initialize_session(self, session):
