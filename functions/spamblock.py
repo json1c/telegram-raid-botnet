@@ -26,11 +26,9 @@ from telethon.sync import TelegramClient
 
 console = Console()
 
-# re.findall(r"\d+\s\w+\s\d{4}", a)
-
 
 class SpamBlockFunc:
-    """Check accounts status"""""""""""""""""
+    """Check accounts status"""
 
     def __init__(self, storage):
         self.storage = storage
@@ -55,7 +53,7 @@ class SpamBlockFunc:
                         if not blocks.get("permanent"):
                             blocks["permanent"] = []
 
-                        blocks["permanent"].appens(session)
+                        blocks["permanent"].append(session)
                     else:
                         date = re.findall(r"\d+\s\w+\s\d{4}", text)[0]
                         console.print(f"[bold red][-] {date}[/]")
