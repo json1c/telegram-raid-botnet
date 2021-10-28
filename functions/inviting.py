@@ -66,7 +66,7 @@ class InvitingFunc:
                         users=[user]
                     ))
                 except PeerFloodError as err:
-                    console.print("[bold red]{err}[/]")
+                    console.print(f"[bold red]{err}[/]")
                     return
                 except UserPrivacyRestrictedError:
                     pass
