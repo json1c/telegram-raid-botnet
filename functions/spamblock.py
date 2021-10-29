@@ -41,13 +41,18 @@ class SpamBlockFunc:
                 me = await session.get_me()
                 console.print(f"[bold white][*] Checking {me.first_name}")
 
-                await session.send_message("SpamBot", "/start")
+                try:
+                    await session.send_message("SpamBot", "/start")
+                except Exception as err:
+                    console.print(f"[bold red][!] {err}[/]")
+                    continue
 
                 messages = await session.get_messages("SpamBot", limit=1)
                 text = messages[0].message
+                print(text)
                 
                 if text != "Good news, no limits are currently applied to your account. You’re free as a bird!":
-                    if "confirmed that you've been sending spam" in text:
+                    if "sending spam" in text:
                         console.print(f"[bold red][-] This is an eternal limitation[/]")
 
                         if not blocks.get("permanent"):
