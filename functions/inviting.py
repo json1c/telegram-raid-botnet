@@ -94,12 +94,13 @@ class InvitingFunc:
                     else:
                         await session(ImportChatInviteRequest(invite))
                 except Exception as err:
+                    console.print(err)
                     await session.disconnect()
                     continue
                 else:
                     break
 
-            users = await session.get_participants(invite, aggressive=True)
+            users = await session.get_participants(link, aggressive=True)
 
         console.print(
             "[bold green][*] Parsed {} users[/]"
