@@ -35,28 +35,16 @@ class JoinerFunc:
         self.storage = storage
         self.sessions = storage.sessions
 
-    def solve_captcha(self, session: TelegramClient):
-        self.solved = False
-
-        @session.on(events.NewMessage)
-        async def handler(msg: types.Message):
-            me = await session.get_me()
-
-            username = "" if me.username is None else me.username
-
-            if not self.solved:
-                if me.first_name in msg.text or username in msg.text:
-                    if msg.reply_markup:
-                        captcha = msg.reply_markup.rows[0] \
-                            .buttons[0].data.decode("utf-8")
-
-                        await msg.click(data=captcha)
-                        self.solved = True
-
-        if not self.storage.initialize:
-            session.start()
-
-        session.run_until_disconnected()
+    async def join(self, session, invite, index):
+        try:
+            if "@" in invite:
+                await session(JoinChannelRequest(invite))
+            else:
+                await session(ImportChatInviteRequest(invite))
+        except Exception as error:
+            print(f"[-] [acc {index + 1}] {error}")
+        else:
+            return True
 
     async def execute(self):
         accounts_count = int(Prompt.ask(
@@ -67,8 +55,11 @@ class JoinerFunc:
         self.sessions = self.sessions[:accounts_count]
 
         link = Prompt.ask("[bold red]link[/]")
-        delay = Prompt.ask("[bold red]delay[/]", default="0")
-        captcha = Confirm.ask("[bold red]captcha?", default=False)
+       
+        mode = Prompt.ask(
+            "[bold red]mode>[/]",
+            choices=["normal", "fast"]
+        )
 
         if "t.me" in link:
             if "joinchat" in link:
@@ -77,36 +68,43 @@ class JoinerFunc:
                 invite = "@" + link.split("/")[-1]
         elif link.startswith("@"):
             invite = link
-            
-        start = perf_counter()
+
         joined = 0
 
-        for index, session in track(
-            enumerate(self.sessions),
-            "[yellow]Bots joining[/]",
-            total=len(self.sessions)
-        ):
-            async with self.storage.ainitialize_session(session):
-                try:
-                    if captcha == "y":
-                        Process(
-                            target=self.solve_captcha,
-                            args=[session]
-                        ).start()
+        if mode == "normal":
+            delay = Prompt.ask("[bold red]delay[/]", default="0")
+            start = perf_counter()
 
-                    if "@" in invite:
-                        await session(JoinChannelRequest(invite))
-                    else:
-                        await session(ImportChatInviteRequest(invite))
-                except Exception as error:
-                    print(f"[-] [acc {index + 1}] {error}")
-                else:
+            for index, session in track(
+                enumerate(self.sessions),
+                "[yellow]Joining[/]",
+                total=len(self.sessions)
+            ):
+                async with self.storage.ainitialize_session(session):
+                    await self.join(session, invite, index)
+                    await asyncio.sleep(int(delay))
+
+        if mode == "fast":
+            if not self.storage.initialize:
+                for session in track(
+                    self.sessions,
+                    "[yellow]Initializing sessions[/]",
+                    total=len(self.sessions)
+                ):
+                    await session.connect()
+
+            with console.status("Joining"):
+                start = perf_counter()
+
+                tasks = await asyncio.wait([
+                    self.join(session, invite, index)
+                    for index, session in enumerate(self.sessions)
+                ])
+
+            for task in tasks[0]:
+                if task.result():
                     joined += 1
-                finally:
-                    await asyncio.sleep(
-                        int(delay)
-                    )
-
+            
         joined_time = round(perf_counter() - start, 2)
-
         console.print(f"[+] {joined} bots joined in [yellow]{joined_time}[/]s")
+
