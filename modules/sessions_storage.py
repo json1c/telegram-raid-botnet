@@ -13,10 +13,13 @@
 
 import os
 import asyncio
+from rich.console import Console
 from contextlib import contextmanager, asynccontextmanager
 from typing import List, Dict
 from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
+
+console = Console()
 
 
 class SessionsStorage:
@@ -46,29 +49,30 @@ class SessionsStorage:
                 self.full_sessions[session_path] = session
 
         if self.initialize:
-            asyncio.get_event_loop().run_until_complete(
-                asyncio.wait([
-                    self.check_session(session, path)
-                    for path, session in self.full_sessions.items()
-                ])
-            )
+            with console.status("Initializing..."):
+                asyncio.get_event_loop().run_until_complete(
+                    asyncio.wait([
+                        self.check_session(session, path)
+                        for path, session in self.full_sessions.items()
+                    ])
+                )
 
     async def check_session(self, session, path):
-        print(f"initializing session {path}")
+        console.log(f"Initializing session {path}")
 
         try:
             await session.connect()
         except Exception as err:
-            print(f"session {path} returned error. {err}. removing.")
+            console.log(f"Session {path} returned error. {err}. Removing.")
             os.remove(os.path.join(directory, file))
             return
 
         if not await session.is_user_authorized():
-            print(f"session {path} is dead. removing it")
+            console.log(f"Session {path} is dead. Removing it")
             os.remove(os.path.join(directory, file))
             return
         
-        print(f"initialized {path}")
+        console.log(f"Initialized {path}")
 
     def get_session_path(self, session: TelegramClient) -> str:
         for path, client in self.full_sessions.items():
