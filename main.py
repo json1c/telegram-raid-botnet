@@ -12,25 +12,29 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import toml
+import sys
 from rich.console import Console
+from modules.settings import Settings
 from modules.sessions_storage import SessionsStorage
 from modules.functions_storage import FunctionsStorage
 
 console = Console()
 
-with open("config.toml") as file:
-    config = toml.load(file)["sessions"]
-
-api_id = config["api_id"]
-api_hash = config["api_hash"]
-
-sessions_storage = SessionsStorage("sessions", api_id, api_hash)
-functions_storage = FunctionsStorage("functions", sessions_storage)
-
 console.print("""
-[bold magenta]This program comes with ABSOLUTELY NO WARRANTY.
+[bold magenta]Copyright (C) 2021  https://github.com/json1c/telegeram-raid-botnet
+This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.[/]
 """)
+
+settings = Settings()
+
+sessions_storage = SessionsStorage(
+    "sessions",
+    settings.api_id,
+    settings.api_hash
+)
+
+functions_storage = FunctionsStorage("functions", sessions_storage)
 
 console.print("[bold white]accounts count> %d[/]" % len(sessions_storage))
 
