@@ -64,12 +64,12 @@ class SessionsStorage:
             await session.connect()
         except Exception as err:
             console.log(f"Session {path} returned error. {err}. Removing.")
-            os.remove(os.path.join(directory, file))
+            os.remove(path)
             return
 
         if not await session.is_user_authorized():
             console.log(f"Session {path} is dead. Removing it")
-            os.remove(os.path.join(directory, file))
+            os.remove(path)
             return
         
         console.log(f"Initialized {path}")
