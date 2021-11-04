@@ -12,6 +12,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import asyncio
 from contextlib import contextmanager, asynccontextmanager
 from typing import List, Dict
 from telethon.sync import TelegramClient
@@ -42,22 +43,32 @@ class SessionsStorage:
                     system_lang_code="en"
                 )
 
-                if self.initialize:
-                    print(f"initializing session {file}")
-
-                    try:
-                        session.connect()
-                    except Exception as err:
-                        print(f"session {file} returned error. {err}. removing.")
-                        os.remove(os.path.join(directory, file))
-                        continue
-
-                    if not session.is_user_authorized():
-                        print(f"session {file} is dead. removing it")
-                        os.remove(os.path.join(directory, file))
-                        continue
-
                 self.full_sessions[session_path] = session
+
+        if self.initialize:
+            asyncio.get_event_loop().run_until_complete(
+                asyncio.wait([
+                    self.check_session(session, path)
+                    for path, session in self.full_sessions.items()
+                ])
+            )
+
+    async def check_session(self, session, path):
+        print(f"initializing session {path}")
+
+        try:
+            await session.connect()
+        except Exception as err:
+            print(f"session {path} returned error. {err}. removing.")
+            os.remove(os.path.join(directory, file))
+            return
+
+        if not await session.is_user_authorized():
+            print(f"session {path} is dead. removing it")
+            os.remove(os.path.join(directory, file))
+            return
+        
+        print(f"initialized {path}")
 
     def get_session_path(self, session: TelegramClient) -> str:
         for path, client in self.full_sessions.items():
