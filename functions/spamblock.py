@@ -34,41 +34,68 @@ class SpamBlockFunc:
         self.storage = storage
         self.sessions = storage.sessions
 
+    async def check(self, session):
+        async with self.storage.ainitialize_session(session):
+            me = await session.get_me()
+
+            try:
+                await session.send_message("SpamBot", "/start")
+            except Exception as err:
+                console.print(f"[bold red][!] {err}[/]")
+                return
+
+            await asyncio.sleep(0.5)
+            messages = await session.get_messages("SpamBot", limit=1)
+
+            text = messages[0].message
+            
+            if text != "Good news, no limits are currently applied to your account. You’re free as a bird!":
+                if "sending spam" in text:
+                    console.print(f"[bold red][-] This is an eternal limitation[/]")
+                    return "permanent", session, me
+
+                else:
+                    result = re.findall(r"\d+\s\w+\s\d{4}", text)
+
+                    if len(result) == 0:
+                        console.print(f"Error with RegExp. {text}")
+                        return
+                    
+                    date = result[0]
+
+                    console.print(f"[bold red][-] {date}[/]")
+                    return date, session, me
+
+            else:
+                console.print("[bold green][+] Account without spam block[/]")
+
     async def execute(self):
         blocks: Dict[str, List[TelegramClient]] = {}
-        for session in self.sessions:
-            async with self.storage.ainitialize_session(session):
-                me = await session.get_me()
-                console.print(f"[bold white][*] Checking {me.first_name}")
 
-                try:
-                    await session.send_message("SpamBot", "/start")
-                except Exception as err:
-                    console.print(f"[bold red][!] {err}[/]")
-                    continue
+        tasks = await asyncio.wait([
+            self.check(session)
+            for session in self.sessions
+        ])
 
-                messages = await session.get_messages("SpamBot", limit=1)
-                text = messages[0].message
-                print(text)
-                
-                if text != "Good news, no limits are currently applied to your account. You’re free as a bird!":
-                    if "sending spam" in text:
-                        console.print(f"[bold red][-] This is an eternal limitation[/]")
+        for task in tasks[0]:
+            result = task.result()
 
-                        if not blocks.get("permanent"):
-                            blocks["permanent"] = []
+            if result is None:
+                continue
 
-                        blocks["permanent"].append(session)
-                    else:
-                        date = re.findall(r"\d+\s\w+\s\d{4}", text)[0]
-                        console.print(f"[bold red][-] {date}[/]")
+            date, session, user = result
 
-                        if not blocks.get(date):
-                            blocks[date] = []
+            if date == "permanent":
+                if not blocks.get("permanent"):
+                    blocks["permanent"] = []
 
-                        blocks[date].append(session)
-                else:
-                    console.print("[bold green][+] Account without spam block[/]")
+                blocks["permanent"].append(session)
+
+            else:
+                if not blocks.get(date):
+                    blocks[date] = []
+
+                blocks[date].append(session)
 
         move_sessions = Confirm.ask("[bold magenta]Move restricted sessions to other folders?[/]")
 
