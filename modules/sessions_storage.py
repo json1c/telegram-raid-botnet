@@ -64,11 +64,13 @@ class SessionsStorage:
             await session.connect()
         except Exception as err:
             console.log(f"Session {path} returned error. {err}. Removing.")
+            del self.full_sessions[path]
             os.remove(path)
             return
 
         if not await session.is_user_authorized():
             console.log(f"Session {path} is dead. Removing it")
+            del self.full_sessions[path]
             os.remove(path)
             return
         
