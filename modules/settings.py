@@ -16,8 +16,6 @@ class Settings:
         with open("config.toml") as file:
             config = toml.load(file)
 
-        print(config)
-
         self.api_id: int = config["sessions"]["api_id"]
         self.api_hash: str = config["sessions"]["api_hash"]
         self.messages: List[str] = config["flood"]["messages"]
