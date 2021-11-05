@@ -13,6 +13,13 @@ api_hash = config["api_hash"]
 
 name = "".join(random.sample(string.ascii_letters, 10))
 
-with TelegramClient(StringSession(), api_id, api_hash) as client:
+with TelegramClient(
+    StringSession(),
+    api_id,
+    api_hash,
+    device_model="Redmi Note 10",
+    lang_code="en",
+    system_lang_code="en"
+) as client:
     with open(f"{name}.session", "w") as file:
         file.write(client.session.save())

@@ -42,6 +42,7 @@ class SessionsStorage:
                     StringSession(auth_key),
                     api_id,
                     api_hash,
+                    device_model="Redmi Note 10",
                     lang_code="en",
                     system_lang_code="en"
                 )
