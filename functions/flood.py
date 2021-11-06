@@ -18,7 +18,7 @@ import random
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 from multiprocessing import Process
-from telethon import events
+from telethon import events, functions, types
 
 console = Console()
 
@@ -69,15 +69,34 @@ class FloodFunc:
             self.config["messages_count"] = 900000000
 
         users = []
-        count = 0
+        admins = []
 
+        user_links = []
+        admin_links = []
+
+        count = 0
         me = await session.get_me()
 
         if self.mention_all:
+            admins = await session.get_participants(
+                msg.chat_id,
+                filter=types.ChannelParticipantsAdmins
+            )
+
             async for user in session.iter_participants(msg.chat_id):
-                users.append(
-                    f'<a href="tg://user?id={user.id}">\u206c\u206f</a>'
-                )
+                if user not in admins:
+                    users.append(user)
+
+            users_links = [
+                f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
+                for user in users
+            ]
+
+            admin_links = [
+                f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
+                for user in admins
+            ]
+
 
         for _ in range(self.config["messages_count"]):
             if not self.mention_all:
@@ -85,10 +104,17 @@ class FloodFunc:
             else:
                 if function is not self.gif_flood:
                     text = random.choice(self.config["messages"]) + \
-                        "\u206c\u206f".join(random.sample(users, 5))
+                        "\u206c\u206f".join(
+                            random.sample(users_links, 15) if self.mention_mode == "users"
+                            else random.sample(admin_links, len(admins) // 2)
+                        )
                 else:
                     text = random.choice(self.config["messages"]) + \
-                        "\u206c\u206f".join(random.sample(users, 2))
+                        "\u206c\u206f".join(
+                            random.sample(users_links, 5) if self.mention_mode == "users"
+                            else random.sample(admin_links, len(admins) // 2)
+                        )
+ 
 
             try:
                 await function(session, msg, text)
@@ -153,6 +179,12 @@ class FloodFunc:
         self.sessions = self.sessions[:accounts_count]
 
         self.mention_all = Confirm.ask("[bold red]mention all?[/]", default="y")
+
+        if self.mention_all:
+            self.mention_mode = Prompt.ask(
+                "[bold red]mention mode[/]",
+                choices=["admins", "users"]
+            )
 
         processes = []
 
