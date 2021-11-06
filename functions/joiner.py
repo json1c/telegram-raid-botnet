@@ -45,6 +45,23 @@ class JoinerFunc:
             print(f"[-] [acc {index + 1}] {error}")
         else:
             return True
+    
+    async def solve_captcha(self, session: TelegramClient):
+        session.add_event_handler(
+            self.on_message,
+            events.NewMessage
+        )
+
+        await session.run_until_disconnected()
+
+    async def on_message(self, msg: types.Message):
+        if msg.mentioned:
+            if msg.reply_markup:
+                captcha = msg.reply_markup.rows[0] \
+                    .buttons[0].data.decode("utf-8")
+
+                await msg.click(data=captcha)
+
 
     async def execute(self):
         accounts_count = int(Prompt.ask(
@@ -73,6 +90,8 @@ class JoinerFunc:
 
         if mode == "normal":
             delay = Prompt.ask("[bold red]delay[/]", default="0")
+            captcha = Confirm.ask("[bold red]captcha[/]")
+
             start = perf_counter()
 
             for index, session in track(
@@ -80,9 +99,15 @@ class JoinerFunc:
                 "[yellow]Joining[/]",
                 total=len(self.sessions)
             ):
-                async with self.storage.ainitialize_session(session):
-                    await self.join(session, invite, index)
-                    await asyncio.sleep(int(delay))
+                await session.start()
+
+                if captcha:
+                    asyncio.create_task(
+                        self.solve_captcha(session)
+                    )
+
+                await self.join(session, invite, index)
+                await asyncio.sleep(int(delay))
 
         if mode == "fast":
             if not self.storage.initialize:
