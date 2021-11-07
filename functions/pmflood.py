@@ -13,7 +13,8 @@
 
 import asyncio
 import random
-from rich.prompt import Prompt
+import os
+from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
 console = Console()
@@ -26,7 +27,7 @@ class PmFloodFunc:
         self.storage = storage
         self.sessions = storage.sessions
 
-    async def flood(self, session, peer, text, delay):
+    async def flood(self, session, peer, text, delay, media):
         count = 0
         errors = 0
 
@@ -35,7 +36,17 @@ class PmFloodFunc:
 
             while True:
                 try:
-                    await session.send_message(peer, text)
+                    if not media:
+                        await session.send_message(peer, text)
+                    else:
+                        file = random.choice(os.listdir("media"))
+
+                        await session.send_file(
+                            peer,
+                            os.path.join("media", file),
+                            caption=text,
+                            parse_mode="html"
+                        )
                 except Exception as err:
                     console.print(
                         "[{name}] [bold red]not sended.[/] {err}"
@@ -72,6 +83,7 @@ class PmFloodFunc:
         self.sessions = self.sessions[:accounts_count]
 
         peer = console.input("[bold red]enter uid or username> [/]")
+        media = Confirm.ask("[bold red]media")
         text = console.input("[bold red]text> [/]")
 
         delay = Prompt.ask(
@@ -85,6 +97,6 @@ class PmFloodFunc:
             self.delay = [int(i) for i in delay]
 
         await asyncio.wait([
-            self.flood(session, peer, text, delay)
+            self.flood(session, peer, text, delay, media)
             for session in self.sessions
         ])
