@@ -2,7 +2,7 @@ import os
 import sys
 import toml
 from rich.console import Console
-from typing import List, Union
+from typing import List
 
 console = Console()
 
@@ -19,7 +19,9 @@ class Settings:
         self.api_id: int = config["sessions"]["api_id"]
         self.api_hash: str = config["sessions"]["api_hash"]
         self.messages: List[str] = config["flood"]["messages"]
-        self.delay: Union[int, List[int, int]] = config["flood"]["delay"]
+        self.messages_count: int = config["flood"]["messages_count"]  
+        self.trigger: str = config["flood"]["trigger"]
+        self.delay: List[int, int] = config["flood"]["delay"]
 
     def save(
         self,

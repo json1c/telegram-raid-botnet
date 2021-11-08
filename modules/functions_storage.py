@@ -16,11 +16,22 @@ import importlib.util
 import inspect
 import os
 
+from typing import List, Callable, Awaitable, Union
+
+from .sessions_storage import SessionsStorage
+from .settings import Settings
 
 class FunctionsStorage:
-    def __init__(self, directory: str, sessions_storage):
-        self.sessions = sessions_storage
-        self.functions = []
+    def __init__(
+        self,
+        directory: str,
+        sessions_storage: SessionsStorage,
+        settings: Settings
+    ):
+        self.storage = sessions_storage
+        self.settings = settings
+
+        self.functions: List[Union[Callable, Awaitable]] = []
 
         for file in os.listdir(directory):
             if file.endswith(".py"):
@@ -41,7 +52,7 @@ class FunctionsStorage:
         for classname, classobj in inspect.getmembers(module, inspect.isclass):
             if classname.endswith("Func"):
                 self.functions.append((
-                    classobj(self.sessions),
+                    classobj(self.storage, self.settings),
                     classobj.__doc__
                 ))
 
