@@ -34,7 +34,11 @@ sessions_storage = SessionsStorage(
     settings.api_hash
 )
 
-functions_storage = FunctionsStorage("functions", sessions_storage)
+functions_storage = FunctionsStorage(
+    "functions",
+    sessions_storage,
+    settings
+)
 
 console.print("[bold white]accounts count> %d[/]" % len(sessions_storage))
 
