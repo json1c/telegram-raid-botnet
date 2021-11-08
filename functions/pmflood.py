@@ -17,15 +17,13 @@ import os
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
+from functions.function import Function
+
 console = Console()
 
 
-class PmFloodFunc:
+class PmFloodFunc(Function):
     """Flood to PM"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def flood(self, session, peer, text, delay, media):
         count = 0
@@ -53,7 +51,7 @@ class PmFloodFunc:
                         .format(name=me.first_name, err=err)
                     )
 
-                    if errors > 3:
+                    if errors >= 5:
                         break
                     
                     errors += 1
@@ -66,21 +64,8 @@ class PmFloodFunc:
                 finally:
                     await self.sleep()
 
-    async def sleep(self):
-        if isinstance(self.delay, list):
-            delay = random.randint(*self.delay)
-        else:
-            delay = self.delay
-
-        await asyncio.sleep(delay)
-
     async def execute(self):
-        accounts_count = int(Prompt.ask(
-            "[bold magenta]how many accounts to use? [/]",
-            default=str(len(self.sessions))
-        ))
-
-        self.sessions = self.sessions[:accounts_count]
+        self.ask_accounts_count()
 
         peer = console.input("[bold red]enter uid or username> [/]")
         media = Confirm.ask("[bold red]media")
@@ -88,13 +73,10 @@ class PmFloodFunc:
 
         delay = Prompt.ask(
             "[bold red]delay[/]",
-            default="1-3"
-        ).split("-")
+            default="-".join(str(x) for x in self.settings.delay)
+        )
 
-        if len(delay) == 1:
-            self.delay = int(delay[0])
-        elif len(delay) == 2:
-            self.delay = [int(i) for i in delay]
+        self.settings.delay = self.parse_delay(delay)
 
         await asyncio.wait([
             self.flood(session, peer, text, delay, media)

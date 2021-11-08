@@ -20,24 +20,22 @@ from rich.console import Console
 from multiprocessing import Process
 from telethon import events, functions, types
 
+from functions.function import Function
+
 console = Console()
 
 
-class FloodFunc:
+class FloodFunc(Function):
     """Flood to chat"""
 
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
+    def __init__(self, storage, settings):
+        super().__init__(storage, settings)
 
         self.modes = (
             ("Raid with text", self.text_flood),
             ("Raid with media", self.gif_flood),
             ("Raid with reply", self.reply_flood)
         )
-
-        with open("config.toml") as f:
-            self.config = toml.load(f)["flood"]
 
     async def text_flood(self, session, msg, text):
         await session.send_message(
@@ -65,9 +63,6 @@ class FloodFunc:
         )
 
     async def flood(self, session, msg, function):
-        if self.config["messages_count"] == 0:
-            self.config["messages_count"] = 900000000
-
         users = []
         admins = []
 
@@ -75,6 +70,7 @@ class FloodFunc:
         admin_links = []
 
         count = 0
+        errors = 0
         me = await session.get_me()
 
         if self.mention_all:
@@ -83,9 +79,10 @@ class FloodFunc:
                 filter=types.ChannelParticipantsAdmins
             )
 
-            async for user in session.iter_participants(msg.chat_id):
-                if user not in admins:
-                    users.append(user)
+            users = [
+                user for user in await session.get_participants(msg.chat_id)
+                if user not in admins
+            ]
 
             users_links = [
                 f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
@@ -98,18 +95,19 @@ class FloodFunc:
             ]
 
 
-        for _ in range(self.config["messages_count"]):
+        while count < self.settings.messages_count \
+                or self.settings.messages_count == 0:
             if not self.mention_all:
-                text = random.choice(self.config["messages"])
+                text = random.choice(self.settings.messages)
             else:
                 if function is not self.gif_flood:
-                    text = random.choice(self.config["messages"]) + \
+                    text = random.choice(self.settings.messages) + \
                         "\u206c\u206f".join(
                             random.sample(users_links, 15) if self.mention_mode == "users"
                             else random.sample(admin_links, len(admins) // 2)
                         )
                 else:
-                    text = random.choice(self.config["messages"]) + \
+                    text = random.choice(self.settings.messages) + \
                         "\u206c\u206f".join(
                             random.sample(users_links, 5) if self.mention_mode == "users"
                             else random.sample(admin_links, len(admins) // 2)
@@ -123,6 +121,11 @@ class FloodFunc:
                     "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
                     .format(name=me.first_name, err=err)
                 )
+
+                errors += 1
+
+                if errors >= 5:
+                    break
             else:
                 count += 1
                 console.print(
@@ -130,20 +133,13 @@ class FloodFunc:
                     .format(name=me.first_name, count=count)
                 )
             finally:
-                await asyncio.sleep(self.get_delay())
-
-    def get_delay(self):
-        if len(self.config["delay"]) == 1:
-            return self.config["delay"][0]
-        else:
-            return random.randint(*self.config["delay"])
+                await self.delay()
 
     def handle(self, session, function):
         @session.on(events.NewMessage)
         async def handler(msg):
-            if msg.raw_text == self.config["trigger"]:
+            if msg.raw_text == self.settings.trigger:
                 await self.flood(session, msg, function)
-                return
 
         if not self.storage.initialize:
             session.start()
@@ -170,14 +166,14 @@ class FloodFunc:
             choice = int(choice) - 1
 
         function = self.modes[choice][1]
+        self.ask_accounts_count()
 
-        accounts_count = int(Prompt.ask(
-            "[bold magenta]how many accounts to use? [/]",
-            default=str(len(self.sessions))
-        ))
+        delay = Prompt.ask(
+            "[bold red]delay[/]",
+            default="-".join(str(x) for x in self.settings.delay)
+        )
 
-        self.sessions = self.sessions[:accounts_count]
-
+        self.settings.delay = self.parse_delay(delay)
         self.mention_all = Confirm.ask("[bold red]mention all?[/]", default="y")
 
         if self.mention_all:
@@ -198,7 +194,7 @@ class FloodFunc:
 
         console.print(
             "[bold white][*] Send «[green]{trigger}[/]» to chat[/]"
-            .format(trigger=self.config["trigger"])
+            .format(trigger=self.settings.trigger)
         )
 
         for process in processes:

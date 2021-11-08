@@ -17,69 +17,61 @@ import asyncio
 from rich.prompt import Prompt
 from rich.console import Console
 
+from functions.function import Function
+
 console = Console()
 
 
-class CommentsFloodFunc:
+class CommentsFloodFunc(Function):
     """Flood to a channel comments"""
 
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
-
-        with open("config.toml") as f:
-            self.config = toml.load(f)["flood"]
-
-    def get_delay(self):
-        if len(self.config["delay"]) == 1:
-            return self.config["delay"][0]
-        else:
-            return random.randint(*self.config["delay"])
-
     async def flood(self, session, channel, post_id):
-        if self.config["messages_count"] == 0:
-            self.config["messages_count"] = 900000000
-
         await session.connect()
         me = await session.get_me()
         count = 0
+        errors = 0
 
-        for _ in range(self.config["messages_count"]):
-            text = random.choice(self.config["messages"])
+        while count < self.settings.messages_count \
+                or self.settings.messages_count == 0:        
+            text = random.choice(self.settings.messages)
 
-            while True:
-                try:
-                    await session.send_message(
-                        channel,
-                        text,
-                        comment_to=int(post_id),
-                        parse_mode="html"
-                    )
-                except Exception as err:
-                    console.print(
-                        "[{name}] [bold red]not sended.[/] {err}"
-                        .format(name=me.first_name, err=err)
-                    )
-                else:
-                    count += 1
-                    console.print(
-                        "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
-                        .format(name=me.first_name, count=count)
-                    )
-                finally:
-                    await asyncio.sleep(
-                        self.get_delay()
-                    )
+            try:
+                await session.send_message(
+                    channel,
+                    text,
+                    comment_to=int(post_id),
+                    parse_mode="html"
+                )
+            except Exception as err:
+                console.print(
+                    "[{name}] [bold red]not sended.[/] {err}"
+                    .format(name=me.first_name, err=err)
+                )
+
+                errors += 1
+
+                if errors >= 5:
+                    break
+            else:
+                count += 1
+                console.print(
+                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
+                    .format(name=me.first_name, count=count)
+                )
+            finally:
+                await self.delay()
 
     async def execute(self):
-        accounts_count = int(Prompt.ask(
-            "[bold magenta]how many accounts to use? [/]",
-            default=str(len(self.sessions))
-        ))
-
-        self.sessions = self.sessions[:accounts_count]
+        self.ask_accounts_count()
 
         link = console.input("[bold red]link to post> [/]")
+
+        delay = Prompt.ask(
+            "[bold red]delay[/]",
+            default="-".join(str(x) for x in self.settings.delay)
+        )
+
+        self.settings.delay = self.parse_delay(delay)
 
         channel = "/" .join(link.split("/")[:-1])
         post_id = link.split("/")[-1]
