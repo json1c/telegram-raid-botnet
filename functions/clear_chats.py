@@ -16,15 +16,13 @@ from telethon import functions, types, TelegramClient
 from rich.console import Console
 from rich.prompt import Confirm
 
+from functions.function import Function
+
 console = Console()
 
 
-class ClearDialogsFunc:
+class ClearDialogsFunc(Function):
     """Clear all dialogs"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def clear(self, session: TelegramClient):
         async with self.storage.ainitialize_session(session):

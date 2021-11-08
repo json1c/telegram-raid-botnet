@@ -25,15 +25,13 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.sync import TelegramClient
 
+from functions.function import Function
+
 console = Console()
 
 
-class JoinerFunc:
+class JoinerFunc(Function):
     """Join chat"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def join(self, session, invite, index):
         try:
@@ -106,7 +104,11 @@ class JoinerFunc:
                         self.solve_captcha(session)
                     )
 
-                await self.join(session, invite, index)
+                is_joined = await self.join(session, invite, index)
+
+                if is_joined:
+                    joined += 1
+
                 await asyncio.sleep(int(delay))
 
         if mode == "fast":

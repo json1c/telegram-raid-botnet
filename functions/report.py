@@ -20,15 +20,16 @@ from rich.prompt import Prompt, Confirm
 from telethon import events, types, functions
 from telethon.sync import TelegramClient
 
+from functions.function import Function
+
 console = Console()
 
 
-class ReportFunc:
+class ReportFunc(Function):
     """Report a channel"""
 
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
+    def __init__(self, storage, settings):
+        super().__init__(storage, settings)
 
         self.reasons = (
             ("Child abuse", types.InputReportReasonChildAbuse()),
@@ -41,12 +42,7 @@ class ReportFunc:
         )
 
     async def execute(self):
-        accounts_count = int(Prompt.ask(
-            "[bold magenta]how many accounts to use? [/]",
-            default=str(len(self.sessions))
-        ))
-
-        self.sessions = self.sessions[:accounts_count]
+        self.ask_accounts_count()
 
         link = Prompt.ask("[bold red]link[/]")
         posts = Prompt.ask("[bold red]enter the post ids[/]")

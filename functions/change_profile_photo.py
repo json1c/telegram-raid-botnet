@@ -19,15 +19,13 @@ from telethon import functions, types
 from rich.progress import track
 from rich.console import Console
 
+from functions.function import Function
+
 console = Console()
 
 
-class ChangeProfilePhotoFunc:
+class ChangeProfilePhotoFunc(Function):
     """Change profile photo"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def execute(self):
         path = os.path.join(os.getcwd(), "assets", "photos")

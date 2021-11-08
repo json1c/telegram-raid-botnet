@@ -23,15 +23,13 @@ from telethon.errors import PeerFloodError, UserPrivacyRestrictedError
 from rich.prompt import Prompt
 from rich.console import Console
 
+from functions.function import Function
+
 console = Console()
 
 
-class InvitingFunc:
-    """Invite users from chat"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
+class InvitingFunc(Function):
+    """Invite users from supergroup"""
 
     @staticmethod
     def transform_to_valid_invite(link):

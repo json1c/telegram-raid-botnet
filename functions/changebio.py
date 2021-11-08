@@ -14,15 +14,13 @@
 from telethon.tl.functions.account import UpdateProfileRequest
 from rich.console import Console
 
+from functions.function import Function
+
 console = Console()
 
 
-class ChangeBioFunc:
+class ChangeBioFunc(Function):
     """Change bio"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def execute(self):
         bio = console.input("[bold red]bio> [/]")

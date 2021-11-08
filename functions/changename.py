@@ -15,15 +15,13 @@ import random
 from telethon.tl.functions.account import UpdateProfileRequest
 from rich.console import Console
 
+from functions.function import Function
+
 console = Console()
 
 
-class ChangeNameFunc:
+class ChangeNameFunc(Function):
     """Change names"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def execute(self):
         from_file = console.input("[bold red]from file? (y/n)> ")

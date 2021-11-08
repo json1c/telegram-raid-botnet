@@ -24,15 +24,13 @@ from rich.console import Console
 from telethon import events
 from telethon.sync import TelegramClient
 
+from functions.function import Function
+
 console = Console()
 
 
-class SpamBlockFunc:
+class SpamBlockFunc(Function):
     """Check accounts status"""
-
-    def __init__(self, storage):
-        self.storage = storage
-        self.sessions = storage.sessions
 
     async def check(self, session):
         async with self.storage.ainitialize_session(session):
