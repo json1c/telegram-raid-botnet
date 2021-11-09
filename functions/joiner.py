@@ -50,10 +50,9 @@ class JoinerFunc(Function):
                 return True
         
         elif mode == "2":
-            channel = await session(GetFullChannelRequest(link))
-            chat = channel.chats[1]
-
             try:
+                channel = await session(GetFullChannelRequest(link))
+                chat = channel.chats[1]
                 await session(JoinChannelRequest(chat))
             except Exception as error:
                 print(f"[-] [acc {index + 1}] {error}")
