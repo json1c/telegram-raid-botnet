@@ -12,6 +12,8 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+import traceback
+import random
 
 from rich.progress import track
 from rich.console import Console
@@ -23,6 +25,7 @@ from time import perf_counter
 from telethon import events, types
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.sync import TelegramClient
 
 from functions.function import Function
@@ -33,16 +36,29 @@ console = Console()
 class JoinerFunc(Function):
     """Join chat"""
 
-    async def join(self, session, invite, index):
-        try:
-            if "@" in invite:
-                await session(JoinChannelRequest(invite))
+    async def join(self, session, link, index, mode):
+        if mode == "1":
+            try:
+                if not "joinchat" in link:
+                    await session(JoinChannelRequest(link))
+                else:
+                    invite = link.split("/")[-1]
+                    await session(ImportChatInviteRequest(invite))
+            except Exception as error:
+                print(f"[-] [acc {index + 1}] {error}")
             else:
-                await session(ImportChatInviteRequest(invite))
-        except Exception as error:
-            print(f"[-] [acc {index + 1}] {error}")
-        else:
-            return True
+                return True
+        
+        elif mode == "2":
+            channel = await session(GetFullChannelRequest(link))
+            chat = channel.chats[1]
+
+            try:
+                await session(JoinChannelRequest(chat))
+            except Exception as error:
+                print(f"[-] [acc {index + 1}] {error}")
+            else:
+                return True
     
     async def solve_captcha(self, session: TelegramClient):
         session.add_event_handler(
@@ -62,31 +78,30 @@ class JoinerFunc(Function):
 
 
     async def execute(self):
-        accounts_count = int(Prompt.ask(
-            "[bold magenta]how many accounts to use? [/]",
-            default=str(len(self.sessions))
-        ))
+        self.ask_accounts_count()
 
-        self.sessions = self.sessions[:accounts_count]
+        print()
 
-        link = Prompt.ask("[bold red]link[/]")
-       
-        mode = Prompt.ask(
-            "[bold red]mode>[/]",
+        console.print(
+            "[1] Just join chat/channel",
+            "[2] Join linked to channel chat",
+            sep="\n",
+            style="bold white"
+        )
+
+        print()
+
+        mode = console.input("[bold red]mode> [/]")
+        link = console.input("[bold red]link> [/]")
+
+        speed = Prompt.ask(
+            "[bold red]speed>[/]",
             choices=["normal", "fast"]
         )
 
-        if "t.me" in link:
-            if "joinchat" in link:
-                invite = link.split("/")[-1]
-            else:
-                invite = "@" + link.split("/")[-1]
-        elif link.startswith("@"):
-            invite = link
-
         joined = 0
 
-        if mode == "normal":
+        if speed == "normal":
             delay = Prompt.ask("[bold red]delay[/]", default="0")
             captcha = Confirm.ask("[bold red]captcha[/]")
 
@@ -104,14 +119,14 @@ class JoinerFunc(Function):
                         self.solve_captcha(session)
                     )
 
-                is_joined = await self.join(session, invite, index)
+                is_joined = await self.join(session, link, index, mode)
 
                 if is_joined:
                     joined += 1
 
                 await asyncio.sleep(int(delay))
 
-        if mode == "fast":
+        if speed == "fast":
             if not self.storage.initialize:
                 for session in track(
                     self.sessions,
@@ -124,7 +139,7 @@ class JoinerFunc(Function):
                 start = perf_counter()
 
                 tasks = await asyncio.wait([
-                    self.join(session, invite, index)
+                    self.join(session, link, index, mode)
                     for index, session in enumerate(self.sessions)
                 ])
 
