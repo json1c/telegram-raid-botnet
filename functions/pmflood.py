@@ -25,7 +25,7 @@ console = Console()
 class PmFloodFunc(Function):
     """Flood to PM"""
 
-    async def flood(self, session, peer, text, delay, media):
+    async def flood(self, session, peer, text, media):
         count = 0
         errors = 0
 
@@ -53,7 +53,7 @@ class PmFloodFunc(Function):
 
                     if errors >= 5:
                         break
-                    
+
                     errors += 1
                 else:
                     count += 1
@@ -62,7 +62,7 @@ class PmFloodFunc(Function):
                         .format(name=me.first_name, count=count)
                     )
                 finally:
-                    await self.sleep()
+                    await self.delay()
 
     async def execute(self):
         self.ask_accounts_count()
@@ -79,6 +79,6 @@ class PmFloodFunc(Function):
         self.settings.delay = self.parse_delay(delay)
 
         await asyncio.wait([
-            self.flood(session, peer, text, delay, media)
+            self.flood(session, peer, text, media)
             for session in self.sessions
         ])
