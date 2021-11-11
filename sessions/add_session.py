@@ -1,4 +1,3 @@
-import os
 import string
 import random
 import toml
@@ -11,7 +10,7 @@ with open("../config.toml") as file:
 api_id = config["api_id"]
 api_hash = config["api_hash"]
 
-name = "".join(random.sample(string.ascii_letters, 10))
+name = "".join(random.choices(string.ascii_letters, k=10))
 
 with TelegramClient(
     StringSession(),
