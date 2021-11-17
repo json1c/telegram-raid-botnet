@@ -11,15 +11,13 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
-import traceback
 import random
+import asyncio
 
 from rich.progress import track
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
-from multiprocessing import Process
 from time import perf_counter
 
 from telethon import events, types
@@ -40,6 +38,7 @@ class JoinerFunc(Function):
         if mode == "1":
             try:
                 if not "joinchat" in link:
+                    print(link)
                     await session(JoinChannelRequest(link))
                 else:
                     invite = link.split("/")[-1]
@@ -48,7 +47,7 @@ class JoinerFunc(Function):
                 print(f"[-] [acc {index + 1}] {error}")
             else:
                 return True
-        
+
         elif mode == "2":
             try:
                 channel = await session(GetFullChannelRequest(link))
@@ -58,7 +57,7 @@ class JoinerFunc(Function):
                 print(f"[-] [acc {index + 1}] {error}")
             else:
                 return True
-    
+
     async def solve_captcha(self, session: TelegramClient):
         session.add_event_handler(
             self.on_message,
@@ -75,6 +74,55 @@ class JoinerFunc(Function):
 
                 await msg.click(data=captcha)
 
+    async def flood(self, session, peer):
+        count = 0
+        errors = 0
+        me = await session.get_me()
+
+        if self.mention_all:
+            users = await session.get_participants(peer)
+
+            users_links = [
+                f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
+                for user in users
+            ]
+
+
+        while count < self.settings.messages_count \
+                or self.settings.messages_count == 0:
+            if not self.mention_all:
+                text = random.choice(self.settings.messages)
+            else:
+                text = random.choice(self.settings.messages) + \
+                    "\u206c\u206f".join(
+                        random.sample(users_links, 5) if self.mention_mode == "users"
+                        else random.sample(admin_links, len(admins) // 2)
+                    )
+
+            try:
+                await session.send_message(
+                    peer,
+                    text,
+                    parse_mode="html"
+                )
+            except Exception as err:
+                console.print(
+                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
+                    .format(name=me.first_name, err=err)
+                )
+
+                errors += 1
+
+                if errors >= 5:
+                    break
+            else:
+                count += 1
+                console.print(
+                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
+                    .format(name=me.first_name, count=count)
+                )
+            finally:
+                await self.delay()
 
     async def execute(self):
         self.ask_accounts_count()
@@ -97,6 +145,14 @@ class JoinerFunc(Function):
             "[bold red]speed>[/]",
             choices=["normal", "fast"]
         )
+
+        flood = Confirm.ask("[bold red]flood instantly?[/]")
+
+        if flood:
+            self.mention_all = Confirm.ask(
+                "[bold red]mention all?[/]",
+                default=True
+            )
 
         joined = 0
 
@@ -137,15 +193,21 @@ class JoinerFunc(Function):
             with console.status("Joining"):
                 start = perf_counter()
 
-                tasks = await asyncio.wait([
+                tasks = await asyncio.gather(*[
                     self.join(session, link, index, mode)
                     for index, session in enumerate(self.sessions)
+
                 ])
 
-            for task in tasks[0]:
-                if task.result():
+            for result in tasks:
+                if result:
                     joined += 1
-            
+        if flood:
+            await asyncio.wait([
+                self.flood(session, link)
+                for session in self.sessions
+            ])
+
         joined_time = round(perf_counter() - start, 2)
         console.print(f"[+] {joined} bots joined in [yellow]{joined_time}[/]s")
 
