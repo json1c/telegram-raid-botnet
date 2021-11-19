@@ -38,7 +38,6 @@ class JoinerFunc(Function):
         if mode == "1":
             try:
                 if not "joinchat" in link:
-                    print(link)
                     await session(JoinChannelRequest(link))
                 else:
                     invite = link.split("/")[-1]
