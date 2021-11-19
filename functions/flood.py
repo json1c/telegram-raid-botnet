@@ -11,23 +11,18 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
-import toml
 import os
 import random
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 from multiprocessing import Process
-from telethon import events, functions, types
+from telethon import events, types
 
 from functions.function import Function
 
 console = Console()
 
-
-class FloodFunc(Function):
-    """Flood to chat"""
-
+class Flood(Function):
     def __init__(self, storage, settings):
         super().__init__(storage, settings)
 
@@ -37,36 +32,37 @@ class FloodFunc(Function):
             ("Raid with reply", self.reply_flood)
         )
 
-    async def text_flood(self, session, msg, text):
+        self.reply_msg_id = 0
+
+    async def text_flood(self, session, peer, text):
         await session.send_message(
-            msg.chat_id,
+            peer,
             text,
             parse_mode="html"
         )
 
-    async def reply_flood(self, session, msg, text):
+    async def reply_flood(self, session, peer, text):
         await session.send_message(
-            msg.chat_id,
+            peer,
             text,
-            reply_to=msg.reply_to.reply_to_msg_id,
+            reply_to=self.reply_msg_id,
             parse_mode="html"
         )
 
-    async def gif_flood(self, session, msg, text):
+    async def gif_flood(self, session, peer, text):
         file = random.choice(os.listdir("media"))
 
         await session.send_file(
-            msg.chat_id,
+            peer,
             os.path.join("media", file),
             caption=text,
             parse_mode="html"
         )
 
-    async def flood(self, session, msg, function):
+    async def flood(self, session, peer, function):
         users = []
         admins = []
 
-        user_links = []
         admin_links = []
 
         count = 0
@@ -75,19 +71,20 @@ class FloodFunc(Function):
 
         if self.mention_all:
             admins = await session.get_participants(
-                msg.chat_id,
+                peer,
                 filter=types.ChannelParticipantsAdmins
             )
 
-            users = [
-                user for user in await session.get_participants(msg.chat_id)
-                if user not in admins
-            ]
+            if self.mention_mode == "users":
+                users = [
+                    user for user in await session.get_participants(peer)
+                    if user not in admins
+                ]
 
-            users_links = [
-                f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
-                for user in users
-            ]
+                users_links = [
+                    f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
+                    for user in users
+                ]
 
             admin_links = [
                 f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
@@ -112,10 +109,9 @@ class FloodFunc(Function):
                             random.sample(users_links, 5) if self.mention_mode == "users"
                             else random.sample(admin_links, len(admins) // 2)
                         )
- 
 
             try:
-                await function(session, msg, text)
+                await function(session, peer, text)
             except Exception as err:
                 console.print(
                     "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
@@ -139,14 +135,21 @@ class FloodFunc(Function):
         @session.on(events.NewMessage)
         async def handler(msg):
             if msg.raw_text == self.settings.trigger:
-                await self.flood(session, msg, function)
+                await self.flood(
+                    session,
+                    msg.chat_id,
+                    function,
+                )
+
+                if msg.reply_to:
+                    self.reply_msg_id = msg.reply_to.reply_to_msg_id
 
         if not self.storage.initialize:
             session.start()
 
         session.run_until_disconnected()
 
-    def execute(self):
+    def ask(self):
         for index, mode in enumerate(self.modes):
             console.print(
                 "[bold white][{index}] {description}[/]"
@@ -165,7 +168,7 @@ class FloodFunc(Function):
         else:
             choice = int(choice) - 1
 
-        function = self.modes[choice][1]
+        self.function = self.modes[choice][1]
         self.ask_accounts_count()
 
         delay = Prompt.ask(
@@ -182,11 +185,12 @@ class FloodFunc(Function):
                 choices=["admins", "users"]
             )
 
+    def start_processes(self):
         processes = []
 
         for session in self.sessions:
             process = Process(
-                target=self.handle, args=[session, function]
+                target=self.handle, args=[session, self.function]
             )
 
             process.start()
@@ -199,3 +203,4 @@ class FloodFunc(Function):
 
         for process in processes:
             process.join()
+
