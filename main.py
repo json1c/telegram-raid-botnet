@@ -53,14 +53,18 @@ for index, module in enumerate(functions_storage.functions):
 while True:
     console.print()
 
-    choice = console.input(
-        "[bold white]>> [/]"
-    )
-
-    while not choice.isdigit():
+    try:
         choice = console.input(
             "[bold white]>> [/]"
         )
+
+        while not choice.isdigit():
+            choice = console.input(
+                "[bold white]>> [/]"
+            )
+    except KeyboardInterrupt:
+        console.print("[bold white]Bye![/]")
+        break
 
     else:
         choice = int(choice) - 1
@@ -68,5 +72,5 @@ while True:
     try:
         functions_storage.execute(choice)
     except KeyboardInterrupt:
-        console.print("[bold white]Bye![/]")
+        pass
 
