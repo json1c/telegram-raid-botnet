@@ -57,7 +57,11 @@ class FunctionsStorage:
                 ))
 
     def execute(self, index: int):
-        function_instance = self.functions[index][0]
+        try:
+            function_instance = self.functions[index][0]
+        except Exception:
+            return
+
         function = function_instance.execute()
 
         if inspect.isawaitable(function):

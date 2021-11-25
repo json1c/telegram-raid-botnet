@@ -50,7 +50,7 @@ for index, module in enumerate(functions_storage.functions):
         .format(index=index + 1, doc=doc)
     )
 
-else:
+while True:
     console.print()
 
     choice = console.input(
@@ -65,4 +65,8 @@ else:
     else:
         choice = int(choice) - 1
 
-    functions_storage.execute(choice)
+    try:
+        functions_storage.execute(choice)
+    except KeyboardInterrupt:
+        console.print("[bold white]Bye![/]")
+
