@@ -37,11 +37,14 @@ class JoinerFunc(Function):
     async def join(self, session, link, index, mode):
         if mode == "1":
             try:
-                if not "joinchat" in link:
-                    await session(JoinChannelRequest(link))
-                else:
+                if "joinchat" in link:
                     invite = link.split("/")[-1]
                     await session(ImportChatInviteRequest(invite))
+                elif "+" in link:
+                    invite = link.split("+")[1]
+                    await session(ImportChatInviteRequest(invite))
+                else:
+                    await session(JoinChannelRequest(link))
             except Exception as error:
                 print(f"[-] [acc {index + 1}] {error}")
             else:
