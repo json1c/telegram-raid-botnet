@@ -19,9 +19,9 @@ class Settings:
         self.api_id: int = config["sessions"]["api_id"]
         self.api_hash: str = config["sessions"]["api_hash"]
         self.messages: List[str] = config["flood"]["messages"]
-        self.messages_count: int = config["flood"]["messages_count"]  
+        self.messages_count: int = config["flood"]["messages_count"]
         self.trigger: str = config["flood"]["trigger"]
-        self.delay: List[int, int] = config["flood"]["delay"]
+        self.delay: List[int] = config["flood"]["delay"]
 
     def save(
         self,
@@ -60,10 +60,10 @@ class Settings:
             "[bold blue]Sessions[/]",
             justify="center"
         )
-        
+
         print()
         api_id, api_hash = self.setup_sessions()
-    
+
         console.print(
             "[bold blue]Flood[/]",
             justify="center"
@@ -86,16 +86,15 @@ class Settings:
         api_hash = console.input("[bold white]Enter API hash: [/]")
 
         return int(api_id), api_hash
-    
+
     def setup_flood(self):
         console.print("[bold white]Enter messages[/]")
 
         messages = []
-        message = console.input("[bold white]>> [/]")
 
-        while message:
+        while message := console.input("[bold white]>> [/]"):
             messages.append(message)
-            message = console.input("[bold white]>> [/]")
+
         print()
 
         delay = console.input("[bold white]Flooding delay (e.g. 1-3): [/]")
