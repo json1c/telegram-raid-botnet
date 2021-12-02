@@ -81,7 +81,12 @@ class CommentsFloodFunc(Function):
             "[bold red]delay[/]",
             default="-".join(str(x) for x in self.settings.delay)
         )
-        media = Confirm.ask("[bold red]media")
+
+        media = Confirm.ask("[bold red]media[/]")
+        from_config = Confirm.ask("[bold red]use messages from config?[/]")
+
+        if not from_config:
+            self.settings.messages = [console.input("[bold red]message: [/]")]
 
         self.settings.delay = self.parse_delay(delay)
 
