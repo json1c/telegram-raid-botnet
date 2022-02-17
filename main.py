@@ -11,7 +11,6 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import toml
 import sys
 from rich.console import Console
 from modules.settings import Settings
@@ -26,51 +25,59 @@ This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.[/]
 """)
 
-settings = Settings()
+console.print("Author's channel: https://t.me/huis_bn")
 
-sessions_storage = SessionsStorage(
-    "sessions",
-    settings.api_id,
-    settings.api_hash
-)
+if sys.version_info < (3, 8, 0):
+    console.print("\n[red]Error: you using an outdated Python version. Install Python 3.8.0 at least.")
+else:
+    if sys.platform == "win32":
+        console.print("[yellow]Warning: you using an untested platform. Some features may not work properly\n")
 
-functions_storage = FunctionsStorage(
-    "functions",
-    sessions_storage,
-    settings
-)
+    settings = Settings()
 
-console.print("[bold white]accounts count> %d[/]" % len(sessions_storage))
-
-for index, module in enumerate(functions_storage.functions):
-    instance, doc = module
-
-    console.print(
-        "[bold white][{index}] {doc}[/]"
-        .format(index=index + 1, doc=doc)
+    sessions_storage = SessionsStorage(
+        "sessions",
+        settings.api_id,
+        settings.api_hash
     )
 
-while True:
-    console.print()
+    functions_storage = FunctionsStorage(
+        "functions",
+        sessions_storage,
+        settings
+    )
 
-    try:
-        choice = console.input(
-            "[bold white]>> [/]"
+    console.print("[bold white]accounts count> %d[/]" % len(sessions_storage))
+
+    for index, module in enumerate(functions_storage.functions):
+        instance, doc = module
+
+        console.print(
+            "[bold white][{index}] {doc}[/]"
+            .format(index=index + 1, doc=doc)
         )
 
-        while not choice.isdigit():
+    while True:
+        console.print()
+
+        try:
             choice = console.input(
                 "[bold white]>> [/]"
             )
-    except KeyboardInterrupt:
-        console.print("[bold white]Bye![/]")
-        break
 
-    else:
-        choice = int(choice) - 1
+            while not choice.isdigit():
+                choice = console.input(
+                    "[bold white]>> [/]"
+                )
+        except KeyboardInterrupt:
+            console.print("[bold white]Bye![/]")
+            break
 
-    try:
-        functions_storage.execute(choice)
-    except KeyboardInterrupt:
-        pass
+        else:
+            choice = int(choice) - 1
+
+        try:
+            functions_storage.execute(choice)
+        except KeyboardInterrupt:
+            pass
 
