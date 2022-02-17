@@ -17,7 +17,7 @@ class Function:
     def parse_delay(self, string: str):
         delay = string.split("-")
         return [int(x) for x in delay]
-    
+
     def ask_accounts_count(self):
         accounts_count = int(Prompt.ask(
             "[bold magenta]how many accounts to use? [/]",

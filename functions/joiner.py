@@ -40,9 +40,6 @@ class JoinerFunc(Function):
                 if "joinchat" in link:
                     invite = link.split("/")[-1]
                     await session(ImportChatInviteRequest(invite))
-                elif "+" in link:
-                    invite = link.split("+")[1]
-                    await session(ImportChatInviteRequest(invite))
                 else:
                     await session(JoinChannelRequest(link))
             except Exception as error:
@@ -142,6 +139,7 @@ class JoinerFunc(Function):
 
         mode = console.input("[bold red]mode> [/]")
         link = console.input("[bold red]link> [/]")
+        link = link.replace("+", "joinchat/")
 
         speed = Prompt.ask(
             "[bold red]speed>[/]",
