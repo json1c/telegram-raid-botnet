@@ -26,6 +26,7 @@ from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.sync import TelegramClient
 
+from functions.flood import Flood
 from functions.function import Function
 
 console = Console()
@@ -37,11 +38,12 @@ class JoinerFunc(Function):
     async def join(self, session, link, index, mode):
         if mode == "1":
             try:
-                if "joinchat" in link:
+                if not "joinchat" in link:
+                    print(link)
+                    await session(JoinChannelRequest(link))
+                else:
                     invite = link.split("/")[-1]
                     await session(ImportChatInviteRequest(invite))
-                else:
-                    await session(JoinChannelRequest(link))
             except Exception as error:
                 print(f"[-] [acc {index + 1}] {error}")
             else:
@@ -73,56 +75,6 @@ class JoinerFunc(Function):
 
                 await msg.click(data=captcha)
 
-    async def flood(self, session, peer):
-        count = 0
-        errors = 0
-        me = await session.get_me()
-
-        if self.mention_all:
-            users = await session.get_participants(peer)
-
-            users_links = [
-                f"<a href=\"tg://user?id={user.id}\">\u206c\u206f</a>"
-                for user in users
-            ]
-
-
-        while count < self.settings.messages_count \
-                or self.settings.messages_count == 0:
-            if not self.mention_all:
-                text = random.choice(self.settings.messages)
-            else:
-                text = random.choice(self.settings.messages) + \
-                    "\u206c\u206f".join(
-                        random.sample(users_links, 5) if self.mention_mode == "users"
-                        else random.sample(admin_links, len(admins) // 2)
-                    )
-
-            try:
-                await session.send_message(
-                    peer,
-                    text,
-                    parse_mode="html"
-                )
-            except Exception as err:
-                console.print(
-                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
-                    .format(name=me.first_name, err=err)
-                )
-
-                errors += 1
-
-                if errors >= 5:
-                    break
-            else:
-                count += 1
-                console.print(
-                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
-                    .format(name=me.first_name, count=count)
-                )
-            finally:
-                await self.delay()
-
     async def execute(self):
         self.ask_accounts_count()
 
@@ -139,7 +91,6 @@ class JoinerFunc(Function):
 
         mode = console.input("[bold red]mode> [/]")
         link = console.input("[bold red]link> [/]")
-        link = link.replace("+", "joinchat/")
 
         speed = Prompt.ask(
             "[bold red]speed>[/]",
@@ -149,10 +100,8 @@ class JoinerFunc(Function):
         flood = Confirm.ask("[bold red]flood instantly?[/]")
 
         if flood:
-            self.mention_all = Confirm.ask(
-                "[bold red]mention all?[/]",
-                default=True
-            )
+            flood_func = Flood(self.storage, self.settings)
+            flood_func.ask()
 
         joined = 0
 
@@ -193,7 +142,7 @@ class JoinerFunc(Function):
             with console.status("Joining"):
                 start = perf_counter()
 
-                tasks = await asyncio.gather(*[
+                tasks = await asyncio.wait([
                     self.join(session, link, index, mode)
                     for index, session in enumerate(self.sessions)
 
@@ -204,7 +153,7 @@ class JoinerFunc(Function):
                     joined += 1
         if flood:
             await asyncio.wait([
-                self.flood(session, link)
+                flood_func.flood(session, link, flood_func.function)
                 for session in self.sessions
             ])
 
