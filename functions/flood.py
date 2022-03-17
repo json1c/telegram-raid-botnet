@@ -114,7 +114,7 @@ class Flood(Function):
                 await function(session, peer, text)
             except Exception as err:
                 console.print(
-                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
+                    "[{name}] [bold red]not sent.[/] [bold white]{err}t"
                     .format(name=me.first_name, err=err)
                 )
 
@@ -125,7 +125,7 @@ class Flood(Function):
             else:
                 count += 1
                 console.print(
-                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
+                    "[{name}] [bold green]sent.[/] COUNT: [yellow]{ct}[/]"
                     .format(name=me.first_name, count=count)
                 )
             finally:
