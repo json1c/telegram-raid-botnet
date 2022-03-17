@@ -39,7 +39,6 @@ class JoinerFunc(Function):
         if mode == "1":
             try:
                 if not "joinchat" in link:
-                    print(link)
                     await session(JoinChannelRequest(link))
                 else:
                     invite = link.split("/")[-1]
@@ -101,7 +100,7 @@ class JoinerFunc(Function):
 
         if flood:
             flood_func = Flood(self.storage, self.settings)
-            flood_func.ask()
+            function_index = flood_func.ask()
 
         joined = 0
 
@@ -111,24 +110,46 @@ class JoinerFunc(Function):
 
             start = perf_counter()
 
-            for index, session in track(
-                enumerate(self.sessions),
-                "[yellow]Joining[/]",
-                total=len(self.sessions)
-            ):
-                await session.start()
+            if function_index != 1:
+                for index, session in track(
+                    enumerate(self.sessions),
+                    "[yellow]Joining[/]",
+                    total=len(self.sessions)
+                ):
+                    await session.start()
 
-                if captcha:
-                    asyncio.create_task(
-                        self.solve_captcha(session)
-                    )
+                    if captcha:
+                        asyncio.create_task(
+                            self.solve_captcha(session)
+                        )
 
-                is_joined = await self.join(session, link, index, mode)
+                    is_joined = await self.join(session, link, index, mode)
 
-                if is_joined:
-                    joined += 1
+                    if is_joined:
+                        joined += 1
 
-                await asyncio.sleep(int(delay))
+                    await asyncio.sleep(int(delay))
+            
+            elif function_index == 1:
+                for index, session in enumerate(self.sessions):
+                    await session.start()
+
+                    if captcha:
+                        asyncio.create_task(
+                            self.solve_captcha(session)
+                        )
+
+                    is_joined = await self.join(session, link, index, mode)
+
+                    console.print("[bold green]Bot joined[/]")
+
+                    if is_joined:
+                        joined += 1
+                    
+                    console.print("[bold white]Starting flood[/]")
+                    
+                    await flood_func.flood(session, link, flood_func.function)
+                    await asyncio.sleep(int(delay))
 
         if speed == "fast":
             if not self.storage.initialize:
@@ -151,7 +172,8 @@ class JoinerFunc(Function):
             for result in tasks:
                 if result:
                     joined += 1
-        if flood:
+
+        if flood and function_index != 1:
             await asyncio.wait([
                 flood_func.flood(session, link, flood_func.function)
                 for session in self.sessions

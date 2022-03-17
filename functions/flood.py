@@ -11,6 +11,7 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
 import os
 import random
 from rich.prompt import Prompt, Confirm
@@ -26,8 +27,12 @@ class Flood(Function):
     def __init__(self, storage, settings):
         super().__init__(storage, settings)
 
+        self.choice = None
+        self.function = None
+
         self.modes = (
             ("Raid with text", self.text_flood),
+            ("Single bot raid", self.text_flood),
             ("Raid with media", self.gif_flood),
             ("Raid with reply", self.reply_flood)
         )
@@ -114,18 +119,18 @@ class Flood(Function):
                 await function(session, peer, text)
             except Exception as err:
                 console.print(
-                    "[{name}] [bold red]not sent.[/] [bold white]{err}t"
+                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
                     .format(name=me.first_name, err=err)
                 )
 
                 errors += 1
 
-                if errors >= 5:
+                if errors >= 3:
                     break
             else:
                 count += 1
                 console.print(
-                    "[{name}] [bold green]sent.[/] COUNT: [yellow]{ct}[/]"
+                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
                     .format(name=me.first_name, count=count)
                 )
             finally:
@@ -166,9 +171,9 @@ class Flood(Function):
             )
 
         else:
-            choice = int(choice) - 1
+            self.choice = int(choice) - 1
 
-        self.function = self.modes[choice][1]
+        self.function = self.modes[self.choice][1]
         self.ask_accounts_count()
 
         delay = Prompt.ask(
@@ -184,23 +189,43 @@ class Flood(Function):
                 "[bold red]mention mode[/]",
                 choices=["admins", "users"]
             )
+        
+        return self.choice
+    
+    async def start_single_raid(self, sessions, link):
+        for session in sessions:
+            await session.connect()
+
+            await self.flood(
+                session,
+                link,
+                self.function,
+            )
 
     def start_processes(self):
+        if self.choice == 1:
+            link = Prompt.ask("[bold red]link to chat[/]")
+
+            asyncio.get_event_loop().run_until_complete(self.start_single_raid(self.sessions, link))
+
         processes = []
 
         for session in self.sessions:
-            process = Process(
-                target=self.handle, args=[session, self.function]
+            if self.choice != 1:
+                process = Process(
+                    target=self.handle, args=[session, self.function]
+                )
+
+                process.start()
+                processes.append(process)
+
+
+        if self.choice != 1:
+            console.print(
+                "[bold white][*] Send «[green]{trigger}[/]» to chat[/]"
+                .format(trigger=self.settings.trigger)
             )
 
-            process.start()
-            processes.append(process)
-
-        console.print(
-            "[bold white][*] Send «[green]{trigger}[/]» to chat[/]"
-            .format(trigger=self.settings.trigger)
-        )
-
-        for process in processes:
-            process.join()
+            for process in processes:
+                process.join()
 
