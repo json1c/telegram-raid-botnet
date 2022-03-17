@@ -55,7 +55,7 @@ class CommentsFloodFunc(Function):
                     )
             except Exception as err:
                 console.print(
-                    "[{name}] [bold red]not sended.[/] {err}"
+                    "[{name}] [bold red]not sent.[/] {err}"
                     .format(name=me.first_name, err=err)
                 )
 
@@ -66,7 +66,7 @@ class CommentsFloodFunc(Function):
             else:
                 count += 1
                 console.print(
-                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
+                    "[{name}] [bold green]sent.[/] COUNT: [yellow]{count}[/]"
                     .format(name=me.first_name, count=count)
                 )
             finally:
