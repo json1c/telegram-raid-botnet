@@ -41,8 +41,6 @@ class ClearDialogsFunc(Function):
                         functions.channels.LeaveChannelRequest(dialog.id)
                     )
 
-                console.log(dialog)
-
     async def execute(self):
         confirm = Confirm.ask("[bold red]are you sure?[/]")
 
