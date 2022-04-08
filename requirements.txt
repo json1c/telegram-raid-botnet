@@ -1,3 +1,6 @@
 telethon
 toml
 rich
+youtube-dl
+py-tgcalls
+ffmpeg-python
