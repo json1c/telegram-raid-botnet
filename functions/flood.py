@@ -18,6 +18,8 @@ from rich.prompt import Prompt, Confirm
 from rich.console import Console
 from multiprocessing import Process
 from telethon import events, types
+from telethon.tl.functions.messages import GetStickerSetRequest
+from telethon.tl.types import InputStickerSetShortName
 
 from functions.function import Function
 
@@ -34,10 +36,21 @@ class Flood(Function):
             ("Raid with text", self.text_flood),
             ("Single bot raid", self.text_flood),
             ("Raid with media", self.gif_flood),
-            ("Raid with reply", self.reply_flood)
+            ("Raid with reply", self.reply_flood),
+            ("Raid with stickers", self.stickers_flood)
         )
 
         self.reply_msg_id = 0
+    
+    async def stickers_flood(self, session, peer, text):
+        stickers = await session(GetStickerSetRequest(stickerset=InputStickerSetShortName(self.sticker_set)))
+        await session.send_file(peer, random.choice(stickers.documents))
+
+        await session.send_message(
+            peer,
+            text,
+            parse_mode="html"
+        )
 
     async def text_flood(self, session, peer, text):
         await session.send_message(
@@ -119,7 +132,7 @@ class Flood(Function):
                 await function(session, peer, text)
             except Exception as err:
                 console.print(
-                    "[{name}] [bold red]not sent.[/] [bold white]{err}[/]"
+                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
                     .format(name=me.first_name, err=err)
                 )
 
@@ -130,7 +143,7 @@ class Flood(Function):
             else:
                 count += 1
                 console.print(
-                    "[{name}] [bold green]sent.[/] COUNT: [yellow]{count}[/]"
+                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
                     .format(name=me.first_name, count=count)
                 )
             finally:
@@ -175,6 +188,10 @@ class Flood(Function):
 
         self.function = self.modes[self.choice][1]
         self.ask_accounts_count()
+
+        if self.choice == 4:
+            self.sticker_set = console.input("[bold red]enter link to sticker set (e.g https://t.me/addstickers/AlbinoEmoji)> [/]")
+            self.sticker_set = self.sticker_set.replace("https://t.me/addstickers/", "")
 
         delay = Prompt.ask(
             "[bold red]delay[/]",
