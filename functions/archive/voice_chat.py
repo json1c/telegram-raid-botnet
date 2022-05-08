@@ -13,7 +13,7 @@
 
 import asyncio
 from pytgcalls import idle
-from pytgcalls.types import AudioPiped
+from pytgcalls.types import AudioPiped, VideoPiped, AudioVideoPiped, AudioImagePiped, LowQualityVideo
 from pytgcalls import PyTgCalls
 from telethon import utils
 from rich.console import Console
@@ -34,10 +34,17 @@ class VoicePlayFunc(Function):
         await app.start()
         entity = await session.get_entity(self.chat)
 
-        await app.join_group_call(
-            utils.get_peer_id(entity),
-            AudioPiped(self.media_url)
-        )
+        if self.format_choice == "1":
+            await app.join_group_call(
+                utils.get_peer_id(entity),
+                AudioPiped(self.media_url),
+            )
+        
+        elif self.format_choice == "2":
+            await app.join_group_call(
+                utils.get_peer_id(entity),
+                AudioVideoPiped(self.media_url, video_parameters=LowQualityVideo())
+            )
 
         await idle()
 
@@ -46,24 +53,43 @@ class VoicePlayFunc(Function):
         self.ask_accounts_count()
 
         self.chat = console.input("[bold red]chat link> [/]")
+
+        console.print(
+            "\n[bold white][1] Audio\n"
+            "[2] Video\n"
+        )
+
+        self.format_choice = console.input("[bold white]>> [/]")
         
         console.print(
             "\n[bold white][1] From Youtube\n"
             "[2] From direct link to file[/]\n"
         )
 
-        choice = console.input("[bold white]>> [/]")
+        source_choice = console.input("[bold white]>> [/]")
 
-        if choice == "1":
+        if source_choice == "1":
             url = console.input("[bold red]video url> [/]")
             ydl = YoutubeDL()
 
             r = ydl.extract_info(url, download=False)
-            self.media_url = r['formats'][-1]['url']
+
+            if self.format_choice == "1":
+                for rformat in r["formats"]:
+                    if rformat["fps"] is None:
+                        self.media_url = rformat["url"]
+                        break
+            
+            elif self.format_choice == "2":
+                for rformat in r["formats"]:
+                    if "144" in rformat["format"]:
+                        print(rformat)
+                        self.media_url = rformat["url"]
+                        break
         
-        elif choice == "2":
-            url = console.input("[bold red]url> [/]")
-            self.media_url = url
+        elif source_choice == "2":
+            self.media_url = console.input("[bold red]media url> [/]")
+
 
         await asyncio.wait([
             self.join_and_play(session)
