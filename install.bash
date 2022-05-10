@@ -75,7 +75,7 @@ elif cat /etc/*release | grep ^NAME | grep -r Arch || cat /etc/*release | grep ^
             echo "Please launch autoinstall with root"
             exit 1;
     fi
-elif  cat /etc/*release | grep ^NAME | grep Ubuntu || cat /etc/*release | grep ^NAME | grep Debian || cat /etc/*release | grep ^NAME | grep Mint || cat /etc/*release | grep ^NAME | grep Mint; then
+elif  cat /etc/*release | grep ^NAME | grep Ubuntu || cat /etc/*release | grep ^NAME | grep Debian || cat /etc/*release | grep ^NAME | grep Mint; then
     if [[ $(whoami) = 'root' ]]; then
         clear
         echo "Detected OS : $(cat /etc/*release | grep ^NAME)"
