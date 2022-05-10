@@ -14,8 +14,23 @@
 # If not, see <https://www.gnu.org/licenses/>.
 set -e
 
-
-if  cat /etc/*release | grep ^NAME | grep CentOS || cat /etc/*release | grep ^NAME | grep Red || cat /etc/*release | grep ^NAME | grep Fedora; then 
+if  [[ $(uname -o) = 'Android' ]]; then
+    if echo $PREFIX | grep -o "com.termux"; then
+        clear
+        echo "Detected System : Android (termux)"
+        echo "Package manager : pkg"
+        echo "Installings packages for your system..."
+        sleep 5
+        pkg update -y&& pkg upgrade -y&& pkg install -y ffmpeg nodejs youtube-dl git python python-pip && pip3 install -r requirements.txt 
+        clear
+        echo "All packages installed!"
+        sleep 2 
+        clear
+        echo "Starting installing botnet..."
+        sleep 2
+        cd ~ && git clone https://github.com/json1c/telegram-raid-botnet.git ~/telegram-raid-botnet && cd telegram-raid-botnet && python main.py
+fi
+elif cat /etc/*release | grep ^NAME | grep CentOS || cat /etc/*release | grep ^NAME | grep Red || cat /etc/*release | grep ^NAME | grep Fedora; then 
     if [[ $(whoami) = 'root' ]]; then
         clear
         echo "Detected OS : $(cat /etc/*release | grep ^NAME)"
@@ -95,21 +110,6 @@ elif  cat /etc/*release | grep ^NAME | grep Ubuntu || cat /etc/*release | grep ^
         echo "Please launch autoinstall with root"        
         exit 1;
     fi
-elif  [[ $(uname -o) = 'Android' ]]; then
-    if echo $PREFIX | grep -o "com.termux"; then
-        clear
-        echo "Detected System : Android (termux)"
-        echo "Package manager : pkg"
-        echo "Installings packages for your system..."
-        sleep 5
-        pkg update && pkg upgrade && pkg install -y ffmpeg nodejs youtube-dl git python python-pip && pip3 install -r requirements.txt 
-        clear
-        echo "All packages installed!"
-        sleep 2 
-        clear
-        echo "Starting installing botnet..."
-        sleep 2
-        cd ~ && git clone https://github.com/json1c/telegram-raid-botnet.git ~/telegram-raid-botnet && cd telegram-raid-botnet && python main.py
     else    
         clear
         echo "Something went wrong, try to install botnet from instruction"
