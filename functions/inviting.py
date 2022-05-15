@@ -98,7 +98,7 @@ class InvitingFunc(Function):
                 else:
                     break
 
-            users = await session.get_participants(link, aggressive=True)
+            users = await session.get_participants(link, aggressive=False)
 
         console.print(
             "[bold green][*] Parsed {} users[/]"
