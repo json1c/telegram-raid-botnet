@@ -25,7 +25,7 @@ This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.[/]
 """)
 
-console.print("Author's channel: https://t.me/huis_bn")
+console.print("Author's channel: [link=https://t.me/huis_bn]https://t.me/huis_bn")
 
 if sys.version_info < (3, 8, 0):
     console.print("\n[red]Error: you using an outdated Python version. Install Python 3.8.0 at least.")
