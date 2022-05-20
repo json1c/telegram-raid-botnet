@@ -43,7 +43,14 @@ class Flood(Function):
         self.reply_msg_id = 0
     
     async def stickers_flood(self, session, peer, text):
-        stickers = await session(GetStickerSetRequest(stickerset=InputStickerSetShortName(self.sticker_set)))
+        stickers = await session(
+            GetStickerSetRequest(
+                stickerset=InputStickerSetShortName(
+                    short_name=self.sticker_set
+                )
+            )
+        )
+
         await session.send_file(peer, random.choice(stickers.documents))
 
         await session.send_message(
@@ -78,6 +85,9 @@ class Flood(Function):
         )
 
     async def flood(self, session, peer, function):
+        if not self.storage.initialize:
+            await session.connect()
+
         users = []
         admins = []
 
@@ -139,7 +149,9 @@ class Flood(Function):
                 errors += 1
 
                 if errors >= 3:
+                    await session.delete_dialog(peer)
                     break
+
             else:
                 count += 1
                 console.print(
