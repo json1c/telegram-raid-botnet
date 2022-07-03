@@ -32,8 +32,7 @@ with console.status("Checking updates..."):
     has_update = updater.check_update()
 
 if has_update:
-    print("\n")
-    console.print("A new botnet update has been released.")
+    console.print("\nA new botnet update has been released.")
     install_choice = console.input("Install? (y/n) >> ")
     
     if install_choice == "y":

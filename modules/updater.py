@@ -20,9 +20,10 @@ def get_current_commit() -> typing.Union[bool, str]:
 def check_update() -> bool:
     """Check update for botnet"""
 
-    upcoming_commit = next(
-        git.Repo().iter_commits("origin/master", max_count=1)
-    ).hexsha
+    upcoming_commit = git.Remote(
+        git.Repo(os.getcwd()),
+        "origin"
+    ).fetch()[0].commit.hexsha
 
     current_commit = get_current_commit()
 
