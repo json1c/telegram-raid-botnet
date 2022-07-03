@@ -4,3 +4,4 @@ rich
 youtube-dl
 py-tgcalls
 ffmpeg-python
+gitpython

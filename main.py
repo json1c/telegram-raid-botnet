@@ -13,6 +13,7 @@
 
 import sys
 from rich.console import Console
+from modules import updater
 from modules.settings import Settings
 from modules.sessions_storage import SessionsStorage
 from modules.functions_storage import FunctionsStorage
@@ -26,6 +27,20 @@ This is free software, and you are welcome to redistribute it under certain cond
 """)
 
 console.print("Author's channel: [link=https://t.me/huis_bn]https://t.me/huis_bn")
+
+with console.status("Checking updates..."):
+    has_update = updater.check_update()
+
+if has_update:
+    print("\n")
+    console.print("A new botnet update has been released.")
+    install_choice = console.input("Install? (y/n) >> ")
+    
+    if install_choice == "y":
+        updater.update(console)
+
+else:
+    console.print("You using the last version of botnet :)")
 
 if sys.version_info < (3, 8, 0):
     console.print("\n[red]Error: you using an outdated Python version. Install Python 3.8.0 at least.")
