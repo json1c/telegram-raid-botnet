@@ -20,11 +20,17 @@ def get_current_commit() -> typing.Union[bool, str]:
 def check_update() -> bool:
     """Check update for botnet"""
 
-    upcoming_commit = git.Remote(
-        git.Repo(os.getcwd()),
-        "origin"
-    ).fetch()[0].commit.hexsha
-
+    try:
+        repo = git.Repo(os.getcwd())
+    except git.exc.GitError:
+        repo = Repo.init(os.getcwd())
+        origin = repo.create_remote("origin", "https://github.com/json1c/telegram-raid-botnet")
+        origin.fetch()
+        repo.create_head("master", origin.refs.master)
+        repo.heads.master.set_tracking_branch(origin.refs.master)
+        repo.heads.master.checkout(True)
+    
+    upcoming_commit = git.Remote(repo, "origin").fetch()[0].commit.hexsha
     current_commit = get_current_commit()
 
     if current_commit != upcoming_commit:

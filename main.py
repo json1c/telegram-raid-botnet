@@ -21,7 +21,7 @@ from modules.functions_storage import FunctionsStorage
 console = Console()
 
 console.print("""
-[bold magenta]Copyright (C) 2021  https://github.com/json1c/telegram-raid-botnet
+[bold magenta]Copyright (C) 2022  https://github.com/json1c/telegram-raid-botnet
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.[/]
 """)
