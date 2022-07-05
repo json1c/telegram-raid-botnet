@@ -29,17 +29,27 @@ This is free software, and you are welcome to redistribute it under certain cond
 console.print("Author's channel: [link=https://t.me/huis_bn]https://t.me/huis_bn")
 
 with console.status("Checking updates..."):
-    has_update = updater.check_update()
+    update = updater.check_update()
 
-if has_update:
-    console.print("\nA new botnet update has been released.")
-    install_choice = console.input("Install? (y/n) >> ")
-    
+if update["has_update"]:
+    current_commit = update["current_commit"]
+    upcoming_commit = update["upcoming_commit"]
+    message = update["message"]
+
+    console.print("\n[bold white]A new botnet update has been released.[/]")
+
+    console.print(
+        "[yellow]{current_commit}[/] → [green]{upcoming_commit}[/] : [white]{message}[/]\n"
+        .format(current_commit=current_commit[:8], upcoming_commit=upcoming_commit[:8], message=message)
+    )
+
+    install_choice = console.input("[bold white]Install? (y/n) >> [/]")
+
     if install_choice == "y":
         updater.update(console)
 
 else:
-    console.print("You using the last version of botnet :)")
+    console.print("You using the latest version of botnet :)")
 
 if sys.version_info < (3, 8, 0):
     console.print("\n[red]Error: you using an outdated Python version. Install Python 3.8.0 at least.")

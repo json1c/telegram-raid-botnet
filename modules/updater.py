@@ -30,13 +30,18 @@ def check_update() -> bool:
         repo.heads.master.set_tracking_branch(origin.refs.master)
         repo.heads.master.checkout(True)
     
-    upcoming_commit = git.Remote(repo, "origin").fetch()[0].commit.hexsha
+    upcoming_commit = git.Remote(repo, "origin").fetch()[0].commit
     current_commit = get_current_commit()
 
-    if current_commit != upcoming_commit:
-        return True
+    if current_commit == upcoming_commit.hexsha:
+        return {"has_update": False}
 
-    return False
+    return {
+        "has_update": True,
+        "current_commit": current_commit,
+        "upcoming_commit": upcoming_commit.hexsha,
+        "message": upcoming_commit.message
+    }
 
 
 def update_requirements(console):
