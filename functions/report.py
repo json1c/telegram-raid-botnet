@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -11,22 +11,17 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
-
 from rich.progress import track
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
-from telethon import events, types, functions
-from telethon.sync import TelegramClient
-
-from functions.function import Function
+from telethon import types, functions
+from functions.base import TelethonFunction
 
 console = Console()
 
-
-class ReportFunc(Function):
-    """Report a channel"""
+class ReportFunc(TelethonFunction):
+    """Report message/post"""
 
     def __init__(self, storage, settings):
         super().__init__(storage, settings)
