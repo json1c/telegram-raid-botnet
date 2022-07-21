@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -13,11 +13,10 @@
 
 import asyncio
 from rich.console import Console
-from functions.function import Function
-
+from functions.base import TelethonFunction
 console = Console()
 
-class SetPasswordFunc(Function):
+class SetPasswordFunc(TelethonFunction):
     """Set two-step verification password to accounts"""
 
     async def execute(self):

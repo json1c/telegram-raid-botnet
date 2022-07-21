@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -19,12 +19,11 @@ from telethon import functions, types
 from rich.progress import track
 from rich.console import Console
 
-from functions.function import Function
-
+from functions.base import TelethonFunction
 console = Console()
 
 
-class ChangeProfilePhotoFunc(Function):
+class ChangeProfilePhotoFunc(TelethonFunction):
     """Change profile photo"""
 
     async def execute(self):

@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -12,19 +12,15 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-import random
-import os
-from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
 from telethon import functions
-
-from functions.function import Function
+from functions.base import TelethonFunction
 
 console = Console()
 
 
-class PollVoteFunc(Function):
+class PollVoteFunc(TelethonFunction):
     """Vote in poll"""
 
     async def vote(self, session, channel, post_id, option_number):

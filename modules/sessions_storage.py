@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -50,6 +50,9 @@ class SessionsStorage:
                 self.full_sessions[session_path] = session
 
         if self.initialize:
+            if len(self.full_sessions) == 0:
+                return print("In order for the botnet to work, you need to add accounts")
+
             with console.status("Initializing..."):
                 asyncio.get_event_loop().run_until_complete(
                     asyncio.wait([

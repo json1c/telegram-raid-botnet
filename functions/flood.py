@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -21,11 +21,10 @@ from telethon import events, types
 from telethon.tl.functions.messages import GetStickerSetRequest
 from telethon.tl.types import InputStickerSetShortName
 
-from functions.function import Function
-
+from functions.base import TelethonFunction
 console = Console()
 
-class Flood(Function):
+class Flood(TelethonFunction):
     def __init__(self, storage, settings):
         super().__init__(storage, settings)
 

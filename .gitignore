@@ -126,5 +126,6 @@ venv.bak/
 dmypy.json
 
 sessions/*.session
+config.toml
 # Pyre type checker
 .pyre/

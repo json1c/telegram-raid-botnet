@@ -12,15 +12,14 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-from functions.function import Function
+from functions.base import TelethonFunction
 from functions.flood import Flood
 from rich.console import Console
-
 
 console = Console()
 
 
-class FloodWithoutTriggerFunc(Function):
+class FloodWithoutTriggerFunc(TelethonFunction):
     """Flood without trigger (asyncio)"""
 
     async def execute(self):

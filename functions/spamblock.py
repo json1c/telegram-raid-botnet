@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -13,7 +13,6 @@
 
 import asyncio
 import os
-import random
 import re
 
 from typing import Dict, List
@@ -21,15 +20,13 @@ from typing import Dict, List
 from rich.prompt import Confirm
 from rich.console import Console
 
-from telethon import events
 from telethon.sync import TelegramClient
 
-from functions.function import Function
-
+from functions.base import TelethonFunction
 console = Console()
 
 
-class SpamBlockFunc(Function):
+class SpamBlockFunc(TelethonFunction):
     """Check accounts status"""
 
     async def check(self, session):

@@ -1,8 +1,22 @@
+# https://github.com/json1c
+# Copyright (C) 2022  json1c
+
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of the License
+
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+
+
 import os
 import sys
 import toml
 from rich.console import Console
-from typing import List
+from typing import List, Tuple
 
 console = Console()
 
@@ -25,12 +39,12 @@ class Settings:
 
     def save(
         self,
-        api_id,
-        api_hash,
-        messages,
-        delay,
-        messages_count,
-        trigger
+        api_id: int,
+        api_hash: str,
+        messages: List[str],
+        delay: List[int],
+        messages_count: int,
+        trigger: str
     ):
         config = dict(
             sessions=dict(
@@ -81,13 +95,13 @@ class Settings:
             trigger
         )
 
-    def setup_sessions(self):
+    def setup_sessions(self) -> Tuple[int, str]:
         api_id = console.input("[bold white]Enter API ID: [/]")
         api_hash = console.input("[bold white]Enter API hash: [/]")
 
         return int(api_id), api_hash
 
-    def setup_flood(self):
+    def setup_flood(self) -> Tuple[List[str], List[int], str]:
         console.print("[bold white]Enter messages[/]")
 
         messages = []

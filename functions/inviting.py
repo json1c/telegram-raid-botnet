@@ -1,6 +1,6 @@
 # https://github.com/json1c
 
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -12,10 +12,8 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import random
 import asyncio
 
-from telethon import functions, types
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest, InviteToChannelRequest
 from telethon.errors import PeerFloodError, UserPrivacyRestrictedError
@@ -23,12 +21,11 @@ from telethon.errors import PeerFloodError, UserPrivacyRestrictedError
 from rich.prompt import Prompt
 from rich.console import Console
 
-from functions.function import Function
-
+from functions.base import TelethonFunction
 console = Console()
 
 
-class InvitingFunc(Function):
+class InvitingFunc(TelethonFunction):
     """Invite users from supergroup"""
 
     @staticmethod

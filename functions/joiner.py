@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2021  json1c
+# Copyright (C) 2022  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -27,12 +27,11 @@ from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.sync import TelegramClient
 
 from functions.flood import Flood
-from functions.function import Function
-
+from functions.base import TelethonFunction
 console = Console()
 
 
-class JoinerFunc(Function):
+class JoinerFunc(TelethonFunction):
     """Join chat"""
 
     async def join(self, session, link, index, mode):
@@ -90,6 +89,8 @@ class JoinerFunc(Function):
 
         mode = console.input("[bold red]mode> [/]")
         link = console.input("[bold red]link> [/]")
+        
+        link = link.replace("+", "joinchat/")
 
         speed = Prompt.ask(
             "[bold red]speed>[/]",
@@ -101,6 +102,9 @@ class JoinerFunc(Function):
         if flood:
             flood_func = Flood(self.storage, self.settings)
             function_index = flood_func.ask()
+
+        else:
+            function_index = None
 
         joined = 0
 
