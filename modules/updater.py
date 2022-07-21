@@ -1,9 +1,24 @@
+# https://github.com/json1c
+# Copyright (C) 2022  json1c
+
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of the License
+
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+
 import git
 import typing
 import os
 import atexit
 import sys
 import subprocess
+
+from git.exc import GitCommandError
 from git import Repo
 
 
@@ -29,8 +44,14 @@ def check_update() -> bool:
         repo.create_head("master", origin.refs.master)
         repo.heads.master.set_tracking_branch(origin.refs.master)
         repo.heads.master.checkout(True)
-    
-    upcoming_commit = git.Remote(repo, "origin").fetch()[0].commit
+
+    try:
+        upcoming_commit = git.Remote(repo, "origin").fetch()[0].commit
+    except GitCommandError as err:
+        if "detected dubious ownership" in err.stderr:
+            os.system(f"git config --global --add safe.directory {os.getcwd()}")
+            return check_update()
+
     current_commit = get_current_commit()
 
     if current_commit == upcoming_commit.hexsha:
