@@ -5,3 +5,5 @@ youtube-dl
 py-tgcalls
 ffmpeg-python
 gitpython
+pyrogram
+tgcrypto
