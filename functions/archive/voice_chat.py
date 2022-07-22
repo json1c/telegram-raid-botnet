@@ -23,7 +23,7 @@ from functions.base import TelethonFunction
 console = Console()
 
 
-class VoicePlayFunc(Function):
+class VoicePlayFunc(TelethonFunction):
     """Join voice chat and play audio"""
 
     async def join_and_play(self, session):
