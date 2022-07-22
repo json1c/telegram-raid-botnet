@@ -111,10 +111,9 @@ def update(console):
         new_commit = repo.head.commit
 
         for info in r:
-            if info.old_commit:
-                for d in new_commit.diff(info.old_commit):
-                    if d.b_path == "requirements.txt":
-                        update_requirements(console)
+            for d in new_commit.diff(info.old_commit):
+                if d.b_path == "requirements.txt":
+                    update_requirements(console)
         
         restart_botnet()
     except git.exc.InvalidGitRepositoryError:
