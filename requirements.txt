@@ -5,5 +5,6 @@ youtube-dl
 py-tgcalls
 ffmpeg-python
 gitpython
+phonenumbers
 pyrogram
 tgcrypto
