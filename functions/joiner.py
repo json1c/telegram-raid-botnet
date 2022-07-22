@@ -28,6 +28,7 @@ from telethon.sync import TelegramClient
 
 from functions.flood import Flood
 from functions.base import TelethonFunction
+
 console = Console()
 
 
@@ -170,19 +171,20 @@ class JoinerFunc(TelethonFunction):
                 tasks = await asyncio.wait([
                     self.join(session, link, index, mode)
                     for index, session in enumerate(self.sessions)
-
                 ])
 
-            for result in tasks:
+            for task in tasks[0]:
+                result = task.result()
+                
                 if result:
                     joined += 1
+
+
+        joined_time = round(perf_counter() - start, 2)
+        console.print(f"[+] {joined} bots joined in [yellow]{joined_time}[/]s")
 
         if flood and function_index != 1:
             await asyncio.wait([
                 flood_func.flood(session, link, flood_func.function)
                 for session in self.sessions
             ])
-
-        joined_time = round(perf_counter() - start, 2)
-        console.print(f"[+] {joined} bots joined in [yellow]{joined_time}[/]s")
-
