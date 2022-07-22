@@ -36,10 +36,10 @@ if update["has_update"]:
     upcoming_commit = update["upcoming_commit"]
     message = update["message"]
 
-    console.print("\n[bold white]A new botnet update has been released.[/]")
+    console.print("[bold white]A new botnet update has been released.[/]")
 
     console.print(
-        "[yellow]{current_commit}[/] → [green]{upcoming_commit}[/] : [white]{message}[/]\n"
+        "[yellow]{current_commit}[/] → [green]{upcoming_commit}[/] : [white]{message}[/]"
         .format(current_commit=current_commit[:8], upcoming_commit=upcoming_commit[:8], message=message)
     )
 

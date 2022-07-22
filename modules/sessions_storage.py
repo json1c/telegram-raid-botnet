@@ -15,7 +15,7 @@ import os
 import asyncio
 from rich.console import Console
 from contextlib import contextmanager, asynccontextmanager
-from typing import List, Dict
+from typing import List, Dict, Union
 from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
 
@@ -23,7 +23,7 @@ console = Console()
 
 
 class SessionsStorage:
-    def __init__(self, directory, api_id, api_hash):
+    def __init__(self, directory: str, api_id: Union[str, int], api_hash: str):
         self.full_sessions: Dict[str, TelegramClient] = {}
 
         self.initialize = (
@@ -61,7 +61,7 @@ class SessionsStorage:
                     ])
                 )
 
-    async def check_session(self, session, path):
+    async def check_session(self, session: TelegramClient, path: str):
         console.log(f"Initializing session {path}")
 
         try:
