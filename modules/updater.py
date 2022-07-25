@@ -51,6 +51,10 @@ def check_update() -> bool:
         if "detected dubious ownership" in err.stderr:
             os.system(f"git config --global --add safe.directory {os.getcwd()}")
             return check_update()
+    
+        else:
+            print(f"Error: {err}")
+            exit(1)
 
     current_commit = get_current_commit()
 
