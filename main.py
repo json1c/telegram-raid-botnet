@@ -12,6 +12,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+import locale
 from rich.console import Console
 from modules import updater
 from modules.settings import Settings
@@ -27,6 +28,11 @@ This is free software, and you are welcome to redistribute it under certain cond
 """)
 
 console.print("Author's channel: [link=https://t.me/huis_bn]https://t.me/huis_bn")
+
+
+if "UTF-8" not in locale.getlocale():
+    console.print("[bold yellow]WARNING:[/] You don't have UTF-8 encoding. Botnet may not work")
+    console.print("Follow this instruction: https://teletype.in/@huis_bn/botnet-faq#Oxdr")
 
 with console.status("Checking updates..."):
     update = updater.check_update()
