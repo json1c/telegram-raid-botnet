@@ -11,21 +11,27 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
 from telethon.tl.functions.account import UpdateProfileRequest
 from rich.console import Console
-
 from functions.base import TelethonFunction
+
 console = Console()
 
 
 class ChangeBioFunc(TelethonFunction):
     """Change bio"""
+    
+    async def change_bio(self, session, bio: str):
+        async with self.storage.ainitialize_session(session):
+            await session(
+                UpdateProfileRequest(about=bio)
+            )
 
     async def execute(self):
         bio = console.input("[bold red]bio> [/]")
-
-        for session in self.sessions:
-            async with self.storage.ainitialize_session(session):
-                await session(
-                    UpdateProfileRequest(about=bio)
-                )
+        
+        await asyncio.gather(*[
+            self.change_bio(session, bio)
+            for session in self.sessions
+        ])
