@@ -11,40 +11,82 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
 import random
+
+from typing import List, Tuple, Optional
 from telethon.tl.functions.account import UpdateProfileRequest
 from rich.console import Console
-
 from functions.base import TelethonFunction
+
 console = Console()
 
 
 class ChangeNameFunc(TelethonFunction):
     """Change names"""
+    
+    @staticmethod
+    def get_random_name(names: List[str]) -> Tuple[str, Optional[str]]:
+        name = random.choice(names).split()
+        
+        if len(name) == 2:
+            return name, None
+
+        return name
+    
+    async def change_name(
+        self,
+        session,
+        account_index: int,
+        names: Optional[List[str]] = None,
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None
+    ):
+        if names is not None:
+            first_name, last_name = self.get_random_name(names)
+
+        async with self.storage.ainitialize_session(session):
+            try:
+                await session(
+                    UpdateProfileRequest(
+                        first_name=first_name,
+                        last_name=last_name or ""
+                    )
+                )
+            except Exception as error:
+                console.print(f"[bold red][!][/] {error}")
+            else:
+                console.print(f"[bold green]Account #{account_index} : Success")
 
     async def execute(self):
         from_file = console.input("[bold red]from file? (y/n)> ")
 
-        for session in self.sessions:
-            if from_file == "y":
-                with open("assets/names.txt") as file:
-                    names = file.read().strip().splitlines()
+        if from_file == "y":
+            with open("assets/names.txt") as file:
+                names = file.read().strip().splitlines()
 
-                name = random.choice(names).split()
-            else:
-                name = console.input("[bold red]name> [/]").split()
+            await asyncio.gather(*[
+                self.change_name(session=session, account_index=index, names=names)
+                for index, session in enumerate(self.sessions)
+            ])
 
+        else:
+            name = console.input("[bold red]name> [/]").split()
+            
             first_name = name[0]
-
+            
             if len(name) == 2:
                 last_name = name[1]
             else:
-                last_name = ""
+                last_name = None
 
-            async with self.storage.ainitialize_session(session):
-                await session(
-                    UpdateProfileRequest(
-                        first_name=first_name,
-                        last_name=last_name
-                    )
+            await asyncio.gather(*[
+                self.change_name(
+                    session=session,
+                    account_index=index,
+                    first_name=first_name,
+                    last_name=last_name
                 )
+                for index, session in enumerate(self.sessions)
+            ])
+
