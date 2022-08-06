@@ -20,21 +20,23 @@ from typing import Dict, List
 from rich.prompt import Confirm
 from rich.console import Console
 
+from telethon.errors import YouBlockedUserError
 from telethon.sync import TelegramClient
 
 from functions.base import TelethonFunction
+
 console = Console()
 
 
 class SpamBlockFunc(TelethonFunction):
     """Check accounts status"""
 
-    async def check(self, session):
+    async def check(self, session: TelegramClient):
         async with self.storage.ainitialize_session(session):
-            me = await session.get_me()
-
             try:
                 await session.send_message("SpamBot", "/start")
+            except YouBlockedUserError:
+                await session
             except Exception as err:
                 console.print(f"[bold red][!] {err}[/]")
                 return
@@ -43,26 +45,21 @@ class SpamBlockFunc(TelethonFunction):
             messages = await session.get_messages("SpamBot", limit=1)
 
             text = messages[0].message
+            lines = text.split("\n")
             
-            if text != "Good news, no limits are currently applied to your account. You’re free as a bird!":
-                if "sending spam" in text:
-                    console.print(f"[bold red][-] This is an eternal limitation[/]")
-                    return "permanent", session, me
-
-                else:
-                    result = re.findall(r"\d+\s\w+\s\d{4}", text)
-
-                    if len(result) == 0:
-                        console.print(f"Error with RegExp. {text}")
-                        return
-                    
-                    date = result[0]
-
-                    console.print(f"[bold red][-] {date}[/]")
-                    return date, session, me
+            if len(lines) == 1:
+                console.print("[bold green][+] Account without spam block[/]")
 
             else:
-                console.print("[bold green][+] Account without spam block[/]")
+                result = re.findall(r"\d+\s\w+\s\d{4}", text)
+                
+                if not result:
+                    console.print(f"[bold red][-] Account with permanent spam block[/]")
+                    return "permanent", session
+                else:
+                    date = result[0]
+                    console.print(f"[bold red][-] Account with spam block: {date}[/]")
+                    return result[0], session 
 
     async def execute(self):
         blocks: Dict[str, List[TelegramClient]] = {}
@@ -78,19 +75,12 @@ class SpamBlockFunc(TelethonFunction):
             if result is None:
                 continue
 
-            date, session, user = result
+            date, session = result
 
-            if date == "permanent":
-                if not blocks.get("permanent"):
-                    blocks["permanent"] = []
+            if not blocks.get(date):
+                blocks[date] = []
 
-                blocks["permanent"].append(session)
-
-            else:
-                if not blocks.get(date):
-                    blocks[date] = []
-
-                blocks[date].append(session)
+            blocks[date].append(session)
 
         move_sessions = Confirm.ask("[bold magenta]Move restricted sessions to other folders?[/]")
 
