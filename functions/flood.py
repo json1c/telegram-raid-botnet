@@ -162,16 +162,16 @@ class Flood(TelethonFunction):
 
     def handle(self, session, function):
         @session.on(events.NewMessage)
-        async def handler(msg):
-            if msg.raw_text == self.settings.trigger:
+        async def handler(message: types.Message):
+            if message.raw_text == self.settings.trigger:
                 await self.flood(
                     session,
-                    msg.chat_id,
+                    message.chat_id,
                     function,
                 )
 
-                if msg.reply_to:
-                    self.reply_msg_id = msg.reply_to.reply_to_msg_id
+                if message.reply_to:
+                    self.reply_msg_id = message.reply_to.reply_to_msg_id
 
         if not self.storage.initialize:
             session.start()
