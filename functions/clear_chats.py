@@ -12,11 +12,13 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+
 from telethon import functions, types, TelegramClient
 from rich.console import Console
 from rich.prompt import Confirm
 
 from functions.base import TelethonFunction
+
 console = Console()
 
 
@@ -25,8 +27,7 @@ class ClearDialogsFunc(TelethonFunction):
 
     async def clear(self, session: TelegramClient):
         async with self.storage.ainitialize_session(session):
-            async for dialog in session.iter_dialogs():
-                console.log(dialog)
+            async for index, dialog in enumerate(session.iter_dialogs()):
 
                 if not isinstance(dialog.entity, types.Channel):
                     await session(functions.messages.DeleteHistoryRequest(
@@ -40,7 +41,7 @@ class ClearDialogsFunc(TelethonFunction):
                         functions.channels.LeaveChannelRequest(dialog.id)
                     )
 
-                console.log(dialog)
+                console.log(f"Dialog #{index} has been deleted")
 
     async def execute(self):
         confirm = Confirm.ask("[bold red]are you sure?[/]")
