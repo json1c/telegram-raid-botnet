@@ -29,7 +29,7 @@ class ChangeNameFunc(TelethonFunction):
     def get_random_name(names: List[str]) -> Tuple[str, Optional[str]]:
         name = random.choice(names).split()
         
-        if len(name) == 2:
+        if len(name) == 1:
             return name, None
 
         return name
@@ -56,7 +56,7 @@ class ChangeNameFunc(TelethonFunction):
             except Exception as error:
                 console.print(f"[bold red][!][/] {error}")
             else:
-                console.print(f"[bold green]Account #{account_index} : Success")
+                console.print(f"[bold green]Account #{account_index} : Set name {first_name} {last_name or ''}")
 
     async def execute(self):
         from_file = console.input("[bold red]from file? (y/n)> ")
