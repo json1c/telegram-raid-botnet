@@ -129,3 +129,4 @@ sessions/*.session
 config.toml
 # Pyre type checker
 .pyre/
+*.jsession
