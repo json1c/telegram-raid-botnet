@@ -22,6 +22,7 @@ from rich.console import Console
 
 from telethon.errors import YouBlockedUserError
 from telethon.sync import TelegramClient
+from telethon.tl.functions.contacts import UnblockRequest
 
 from functions.base import TelethonFunction
 
@@ -36,7 +37,9 @@ class SpamBlockFunc(TelethonFunction):
             try:
                 await session.send_message("SpamBot", "/start")
             except YouBlockedUserError:
-                await session
+                await session(UnblockRequest("spambot"))
+                return await self.check(session)
+
             except Exception as err:
                 console.print(f"[bold red][!] {err}[/]")
                 return
