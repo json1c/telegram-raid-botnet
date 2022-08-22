@@ -15,6 +15,7 @@ import asyncio
 import random
 
 from typing import List, Tuple, Optional
+from telethon import TelegramClient
 from telethon.tl.functions.account import UpdateProfileRequest
 from rich.console import Console
 from functions.base import TelethonFunction
@@ -36,7 +37,7 @@ class ChangeNameFunc(TelethonFunction):
     
     async def change_name(
         self,
-        session,
+        session: TelegramClient,
         account_index: int,
         names: Optional[List[str]] = None,
         first_name: Optional[str] = None,
@@ -46,6 +47,10 @@ class ChangeNameFunc(TelethonFunction):
             first_name, last_name = self.get_random_name(names)
 
         async with self.storage.ainitialize_session(session):
+            me = await session.get_me()
+            
+            full_name = me.first_name + (" " + me.last_name if me.last_name else "")
+
             try:
                 await session(
                     UpdateProfileRequest(
@@ -56,9 +61,11 @@ class ChangeNameFunc(TelethonFunction):
             except Exception as error:
                 console.print(f"[bold red][!][/] {error}")
             else:
-                console.print(f"[bold green]Account #{account_index} : Set name {first_name} {last_name or ''}")
+                console.print(f"Name changed [bold green]successfully.[/] ( {full_name} → {first_name} {last_name or ''} )")
 
     async def execute(self):
+        self.ask_accounts_count()
+
         from_file = console.input("[bold red]from file? (y/n)> ")
 
         if from_file == "y":
@@ -71,7 +78,8 @@ class ChangeNameFunc(TelethonFunction):
             ])
 
         else:
-            name = console.input("[bold red]name> [/]").split()
+            name = console.input("[bold red]name> [/]").split(maxsplit=1)
+            print()
             
             first_name = name[0]
             
