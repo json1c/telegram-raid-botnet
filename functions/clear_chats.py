@@ -27,8 +27,7 @@ class ClearDialogsFunc(TelethonFunction):
 
     async def clear(self, session: TelegramClient):
         async with self.storage.ainitialize_session(session):
-            async for index, dialog in enumerate(session.iter_dialogs()):
-
+            async for dialog in session.iter_dialogs():
                 if not isinstance(dialog.entity, types.Channel):
                     await session(functions.messages.DeleteHistoryRequest(
                         peer=dialog.entity,
@@ -41,7 +40,7 @@ class ClearDialogsFunc(TelethonFunction):
                         functions.channels.LeaveChannelRequest(dialog.id)
                     )
 
-                console.log(f"Dialog #{index} has been deleted")
+                console.log(f"Dialog {dialog.id} | {dialog.title} has been deleted")
 
     async def execute(self):
         confirm = Confirm.ask("[bold red]are you sure?[/]")
