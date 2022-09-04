@@ -127,34 +127,38 @@ class Flood(TelethonFunction):
                 if function is not self.gif_flood:
                     text = random.choice(self.settings.messages) + \
                         "\u206c\u206f".join(
-                            random.sample(users_links, 15) if self.mention_mode == "users"
-                            else random.sample(admin_links, len(admins) // 2)
+                            random.sample(users_links, 10) if self.mention_mode == "users"
+                            else random.sample(admin_links, 2)
                         )
                 else:
                     text = random.choice(self.settings.messages) + \
                         "\u206c\u206f".join(
-                            random.sample(users_links, 5) if self.mention_mode == "users"
-                            else random.sample(admin_links, len(admins) // 2)
+                            random.sample(users_links, 10) if self.mention_mode == "users"
+                            else random.sample(admin_links, 2)
                         )
 
             try:
                 await function(session, peer, text)
             except Exception as err:
                 console.print(
-                    "[{name}] [bold red]not sended.[/] [bold white]{err}[/]"
+                    "[{name}] [bold red]not sent.[/] [bold white]{err}[/]"
                     .format(name=me.first_name, err=err)
                 )
 
                 errors += 1
 
                 if errors >= 3:
-                    await session.delete_dialog(peer)
+                    try:
+                        await session.delete_dialog(peer)
+                    except Exception as err:
+                        console.print(f"[bold red]ERROR[/] while leaving from chat: {err}")
+
                     break
 
             else:
                 count += 1
                 console.print(
-                    "[{name}] [bold green]sended.[/] COUNT: [yellow]{count}[/]"
+                    "[{name}] [bold green]sent.[/] COUNT: [yellow]{count}[/]"
                     .format(name=me.first_name, count=count)
                 )
             finally:
