@@ -18,8 +18,9 @@ from rich.prompt import Prompt
 
 class BaseFunction:
     def parse_delay(self, string: str):
-        delay = string.split("-")
-        return [int(x) for x in delay]
+        return list(
+            map(int, string.split("-"))
+        )
 
     def ask_accounts_count(self):
         accounts_count = int(Prompt.ask(

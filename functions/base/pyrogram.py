@@ -13,14 +13,15 @@
 
 import struct
 import base64
-from telethon import TelegramClient
-
-from functions.base.base import BaseFunction
-from modules.sessions_storage import SessionsStorage
-from modules.settings import Settings
 
 from typing import List
 from pyrogram import Client
+from telethon import TelegramClient
+
+from modules.storages.sessions_storage import SessionsStorage
+from modules.settings import Settings
+from modules.types.json_session import JsonSession
+from functions.base.base import BaseFunction
 
 
 class PyrogramFunction(BaseFunction):
@@ -31,9 +32,10 @@ class PyrogramFunction(BaseFunction):
         self.settings = settings
 
         self.telethon_sessions: List[TelegramClient] = storage.sessions
+        self.json_sessions: List[JsonSession] = storage.json_sessions
         self.sessions: List[Client] = []
         
-        for session in self.telethon_sessions:
+        for json_session, session in zip(self.json_sessions, self.telethon_sessions):
             packed = struct.pack(
                 self.PYROGRAM_STRING_SESSION_FORMAT,
                 session.session.dc_id,
@@ -49,12 +51,13 @@ class PyrogramFunction(BaseFunction):
             self.sessions.append(
                 Client(
                     name=self.storage.get_session_path(session),
-                    api_id=settings.api_id,
-                    api_hash=settings.api_hash,
+                    api_id=json_session.account.application.api_id,
+                    api_hash=json_session.account.application.api_hash,
                     session_string=pyrogram_string_session,
-                    app_version="5.2",
-                    device_model="Redmi Note 10",
-                    lang_code="en",
+                    app_version=json_session.account.application.app_version,
+                    device_model=json_session.account.application.device_name,
+                    system_version=json_session.account.application.sdk,
+                    lang_code=json_session.account.application.system_lang_code,
                     in_memory=True
                 )
             )
