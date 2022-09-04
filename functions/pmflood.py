@@ -14,22 +14,36 @@
 import asyncio
 import random
 import os
+from telethon import functions, types
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
 from functions.base import TelethonFunction
+
 console = Console()
 
 
 class PmFloodFunc(TelethonFunction):
     """Flood to PM"""
 
-    async def flood(self, session, peer, text, media):
+    async def flood(self, session, peer, text, media, by_phone_number):
         count = 0
         errors = 0
 
         async with self.storage.ainitialize_session(session):
             me = await session.get_me()
+            
+            if by_phone_number:
+                result = await session(functions.contacts.ImportContactsRequest(
+                    contacts=[types.InputPhoneContact(
+                        client_id=random.randrange(-2**63, 2**63),
+                        phone=peer,
+                        first_name='owned by huis',
+                        last_name=''
+                    )]
+                ))
+                
+                peer = result.users[0]
 
             while True:
                 try:
@@ -66,7 +80,22 @@ class PmFloodFunc(TelethonFunction):
     async def execute(self):
         self.ask_accounts_count()
 
-        peer = console.input("[bold red]enter uid or username> [/]")
+        console.print()
+        console.print("[bold white][1] Flood by username")
+        console.print("[bold white][2] Flood by phone number")
+        choice = console.input("\n[bold white]>> ")
+        
+        by_phone_number = False
+        
+        if choice == "1":
+            peer = console.input("[bold red]enter username> [/]")
+        elif choice == "2":
+            by_phone_number = True
+            peer = console.input("[bold red]enter phone number> [/]")
+        else:
+            console.print("[bold red]Invalid input!")
+            return
+
         media = Confirm.ask("[bold red]media")
         text = console.input("[bold red]text> [/]")
 
@@ -78,6 +107,6 @@ class PmFloodFunc(TelethonFunction):
         self.settings.delay = self.parse_delay(delay)
 
         await asyncio.wait([
-            self.flood(session, peer, text, media)
+            self.flood(session, peer, text, media, by_phone_number=by_phone_number)
             for session in self.sessions
         ])
