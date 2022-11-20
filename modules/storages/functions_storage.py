@@ -19,7 +19,7 @@ import os
 from typing import List, Callable, Awaitable, Union
 
 from .sessions_storage import SessionsStorage
-from .settings import Settings
+from ..settings import Settings
 
 class FunctionsStorage:
     def __init__(
