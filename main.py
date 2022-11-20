@@ -16,8 +16,8 @@ import locale
 from rich.console import Console
 from modules import updater
 from modules.settings import Settings
-from modules.sessions_storage import SessionsStorage
-from modules.functions_storage import FunctionsStorage
+from modules.storages.sessions_storage import SessionsStorage
+from modules.storages.functions_storage import FunctionsStorage
 
 console = Console()
 
