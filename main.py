@@ -27,7 +27,7 @@ This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.[/]
 """)
 
-console.print("Author's channel: [link=https://t.me/huis_bn]https://t.me/huis_bn")
+console.print("Author's channel: [link=https://t.me/huis_tg]https://t.me/huis_tg")
 
 
 if "UTF-8" not in locale.getlocale():
