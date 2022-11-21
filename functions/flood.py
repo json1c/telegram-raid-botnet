@@ -33,7 +33,7 @@ class Flood(TelethonFunction):
 
         self.modes = (
             ("Raid with text", self.text_flood),
-            ("Single bot raid", self.text_flood),
+            ("Single bot raid", self.start_single_raid),
             ("Raid with media", self.gif_flood),
             ("Raid with reply", self.reply_flood),
             ("Raid with stickers", self.stickers_flood)
