@@ -1,25 +1,34 @@
-import string
+import sys
+
+sys.path.append("..")
+
+import asyncio
 import random
-import toml
-from telethon.sync import TelegramClient
-from telethon.sessions import StringSession
 
-with open("../config.toml") as file:
-    config = toml.load(file)["sessions"]
+from telethon import TelegramClient
 
-api_id = config["api_id"]
-api_hash = config["api_hash"]
+from modules.generators.linux import LinuxAPI
+from modules.generators.telegram_android import TelegramAppAPI
+from modules.types.json_session import JsonSession
 
-name = "".join(random.choices(string.ascii_letters, k=10))
 
-with TelegramClient(
-    StringSession(),
-    api_id,
-    api_hash,
-    device_model="Redmi Note 10",
-    lang_code="en",
-    system_lang_code="en"
-) as client:
-    with open(f"{name}.session", "w") as file:
-        file.write(client.session.save())
+print("[1] - Telegram Android")
+print("[2] - Telegram Desktop (Linux)")
+print("[3] - Random")
+
+choice = input(">> ")
+
+if choice == "1":
+    generator = TelegramAppAPI
+
+if choice == "2":
+    generator = LinuxAPI
+
+if choice == "3":
+    generator = None
+
+
+asyncio.run(
+    JsonSession().create_application_session(generator)
+)
 
