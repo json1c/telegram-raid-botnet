@@ -22,3 +22,4 @@ with TelegramClient(
 ) as client:
     with open(f"{name}.session", "w") as file:
         file.write(client.session.save())
+
