@@ -53,26 +53,53 @@ class SessionsStorage:
 
                 self.full_sessions[session_path] = session
         
-            elif file.endswith(".jsession"):
+                        elif file.endswith(".jsession"):
                 session_path = os.path.join(directory, file)
-                
+
                 with open(session_path) as fileobj:
                     session_settings = json.load(fileobj)
-                
+
                 session = JsonSession(dict_settings=session_settings)
 
-                client = TelegramClient(
-                    session=StringSession(session.account.auth_key),
-                    api_id=session.account.application.api_id,
-                    api_hash=session.account.application.api_hash,
-                    device_model=session.account.application.device_name,
-                    app_version=session.account.application.app_version,
-                    system_version=session.account.application.sdk,
-                    lang_code=session.account.application.system_lang_code,
-                    system_lang_code=session.account.application.system_lang_code
-                )
+                if session.account.proxy:
+                    try:
+                        socks = session.account.proxy.socks
+                        proxy_ip = session.account.proxy.proxy_ip
+                        port = session.account.proxy.port
+                        proxy_login = session.account.proxy.proxy_login
+                        proxy_pass = session.account.proxy.proxy_pass
+                    except:
+                        socks = session.account.proxy.socks
+                        proxy_ip = session.account.proxy.proxy_ip
+                        port = session.account.proxy.port
+                        proxy_login = None
+                        proxy_pass = None
+
+                    client = TelegramClient(
+                        session=StringSession(session.account.auth_key),
+                        api_id=session.account.application.api_id,
+                        api_hash=session.account.application.api_hash,
+                        proxy=(socks, proxy_ip, port,  True, proxy_login, proxy_pass),
+                        device_model=session.account.application.device_name,
+                        app_version=session.account.application.app_version,
+                        system_version=session.account.application.sdk,
+                        lang_code=session.account.application.system_lang_code,
+                        system_lang_code=session.account.application.system_lang_code
+                    )
+                else:
+                    client = TelegramClient(
+                        session=StringSession(session.account.auth_key),
+                        api_id=session.account.application.api_id,
+                        api_hash=session.account.application.api_hash,
+                        device_model=session.account.application.device_name,
+                        app_version=session.account.application.app_version,
+                        system_version=session.account.application.sdk,
+                        lang_code=session.account.application.system_lang_code,
+                        system_lang_code=session.account.application.system_lang_code
+                    )
 
                 self.full_sessions[session_path] = client
+
 
         if self.initialize:
             if len(self.full_sessions) == 0:
