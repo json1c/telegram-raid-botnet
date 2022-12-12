@@ -31,5 +31,12 @@ class AccountSettings:
                 sdk=session_dict["application"]["sdk"],
                 lang_pack=session_dict["application"]["lang_pack"],
                 system_lang_code=session_dict["application"]["system_lang_code"],
+            ),
+            proxy=Proxy(
+                socks=session_dict["proxy"]["socks"],
+                proxy_ip=session_dict["proxy"]["proxy_ip"],
+                port=session_dict["proxy"]["port"],
+                proxy_login=session_dict["proxy"]["proxy_login"],
+                proxy_pass=session_dict["proxy"]["proxy_pass"]
             )
         )
