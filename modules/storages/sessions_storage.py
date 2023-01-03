@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2022  json1c
+# Copyright (C) 2023  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -41,6 +41,9 @@ class SessionsStorage:
 
                 with open(session_path) as fileobj:
                     auth_key = fileobj.read()
+                
+                if len(auth_key) != 353:
+                    continue
 
                 session = TelegramClient(
                     StringSession(auth_key),
@@ -72,6 +75,7 @@ class SessionsStorage:
                     system_lang_code=session.account.application.system_lang_code
                 )
 
+                self.json_sessions.append(session)
                 self.full_sessions[session_path] = client
 
         if self.initialize:
