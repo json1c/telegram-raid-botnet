@@ -1,5 +1,5 @@
 # https://github.com/json1c
-# Copyright (C) 2022  json1c
+# Copyright (C) 2023  json1c
 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the License
@@ -22,7 +22,7 @@ from modules.storages.functions_storage import FunctionsStorage
 console = Console()
 
 console.print("""
-[bold magenta]Copyright (C) 2022  https://github.com/json1c/telegram-raid-botnet
+[bold magenta]Copyright (C) 2023  https://github.com/json1c/telegram-raid-botnet
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.[/]
 """)
