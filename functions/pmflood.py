@@ -106,7 +106,7 @@ class PmFloodFunc(TelethonFunction):
 
         self.settings.delay = self.parse_delay(delay)
 
-        await asyncio.wait([
+        await asyncio.gather(*[
             self.flood(session, peer, text, media, by_phone_number=by_phone_number)
             for session in self.sessions
         ])

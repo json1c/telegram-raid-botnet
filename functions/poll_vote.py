@@ -45,7 +45,7 @@ class PollVoteFunc(TelethonFunction):
         post_id = int(post_link.split("/")[-1])
 
         with console.status("Voting"):
-            await asyncio.wait([
+            await asyncio.gather(*[
                 self.vote(session, channel, post_id, option_number)
                 for session in self.sessions
             ])

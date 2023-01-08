@@ -92,7 +92,7 @@ class CommentsFloodFunc(TelethonFunction):
         channel = "/" .join(link.split("/")[:-1])
         post_id = link.split("/")[-1]
 
-        await asyncio.wait([
+        await asyncio.gather(*[
             self.flood(session, channel, int(post_id), media)
             for session in self.sessions
         ])

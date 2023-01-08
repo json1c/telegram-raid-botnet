@@ -90,7 +90,7 @@ class VoicePlayFunc(TelethonFunction):
             self.media_url = console.input("[bold red]media url> [/]")
 
 
-        await asyncio.wait([
+        await asyncio.gather(*[
             self.join_and_play(session)
             for session in self.sessions
         ])

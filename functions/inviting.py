@@ -107,7 +107,7 @@ class InvitingFunc(TelethonFunction):
         link = console.input("[bold red]where to invite users> [/]")
 
         with console.status("Inviting...", spinner="dots"):
-            await asyncio.wait([
+            await asyncio.gather(*[
                 self.invite(users_chunk, link, session)
                 for session, users_chunk in zip(self.sessions, users)
             ])

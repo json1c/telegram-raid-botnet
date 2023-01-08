@@ -67,7 +67,7 @@ class SpamBlockFunc(TelethonFunction):
     async def execute(self):
         blocks: Dict[str, List[TelegramClient]] = {}
 
-        tasks = await asyncio.wait([
+        tasks = await asyncio.gather(*[
             self.check(session)
             for session in self.sessions
         ])

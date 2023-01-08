@@ -46,7 +46,7 @@ class ClearDialogsFunc(TelethonFunction):
         confirm = Confirm.ask("[bold red]are you sure?[/]")
 
         if confirm:
-            await asyncio.wait([
+            await asyncio.gather(*[
                 self.clear(session)
                 for session in self.sessions
             ])

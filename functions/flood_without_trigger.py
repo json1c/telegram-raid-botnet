@@ -27,7 +27,7 @@ class FloodWithoutTriggerFunc(TelethonFunction):
         flood = Flood(self.storage, self.settings)
         flood.ask()
 
-        await asyncio.wait([
+        await asyncio.gather(*[
             flood.flood(session, link, flood.function)
             for session in self.sessions
         ])

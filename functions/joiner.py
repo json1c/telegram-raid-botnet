@@ -168,7 +168,7 @@ class JoinerFunc(TelethonFunction):
             with console.status("Joining"):
                 start = perf_counter()
 
-                tasks = await asyncio.wait([
+                tasks = await asyncio.gather(*[
                     self.join(session, link, index, mode)
                     for index, session in enumerate(self.sessions)
                 ])
@@ -184,7 +184,7 @@ class JoinerFunc(TelethonFunction):
         console.print(f"[+] {joined} bots joined in [yellow]{joined_time}[/]s")
 
         if flood and function_index != 1:
-            await asyncio.wait([
+            await asyncio.gather(*[
                 flood_func.flood(session, link, flood_func.function)
                 for session in self.sessions
             ])

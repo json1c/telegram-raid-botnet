@@ -84,7 +84,7 @@ class SessionsStorage:
 
             with console.status("Initializing..."):
                 asyncio.get_event_loop().run_until_complete(
-                    asyncio.wait([
+                    asyncio.gather(*[
                         self.check_session(session, path)
                         for path, session in self.full_sessions.items()
                     ])
