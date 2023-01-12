@@ -168,14 +168,12 @@ class JoinerFunc(TelethonFunction):
             with console.status("Joining"):
                 start = perf_counter()
 
-                tasks = await asyncio.gather(*[
+                results = await asyncio.gather(*[
                     self.join(session, link, index, mode)
                     for index, session in enumerate(self.sessions)
                 ])
 
-            for task in tasks[0]:
-                result = task.result()
-                
+            for result in results:
                 if result:
                     joined += 1
 
