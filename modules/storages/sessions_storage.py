@@ -65,7 +65,6 @@ class SessionsStorage:
                 session = JsonSession(dict_settings=session_settings)
                 
                 self.json_sessions.append(session)
-                self.full_sessions[session_path] = client
                 self.jsessions_paths[session_path] = session
 
                 if old_session := self.is_user_id_exists(
@@ -90,6 +89,8 @@ class SessionsStorage:
                     lang_code=session.account.application.system_lang_code,
                     system_lang_code=session.account.application.system_lang_code,
                 )
+                
+                self.full_sessions[session_path] = client
 
         if self.initialize:
             if len(self.full_sessions) == 0:
