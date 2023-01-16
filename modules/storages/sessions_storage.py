@@ -12,28 +12,27 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 
-import os
 import asyncio
 import json
-from modules.types.json_session import JsonSession
+import os
+from contextlib import asynccontextmanager, contextmanager
+from typing import Dict, List, Union
+
 from rich.console import Console
-from contextlib import contextmanager, asynccontextmanager
-from typing import List, Dict, Union
-from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
+from telethon.sync import TelegramClient
+
+from modules.types.json_session import JsonSession
 
 console = Console()
 
 
 class SessionsStorage:
     def __init__(self, directory: str, api_id: Union[str, int], api_hash: str):
-        self.full_sessions: Dict[str, TelegramClient] = {}
+        self.full_sessions: Dict[str, Union[TelegramClient, JsonSession]] = {}
         self.json_sessions: List[JsonSession] = []
 
-        self.initialize = (
-            True if input("Initialize sessions? (y/n) ") == "y"
-            else False
-        )
+        self.initialize = True if input("Initialize sessions? (y/n) ") == "y" else False
 
         for file in os.listdir(directory):
             if file.endswith(".session"):
@@ -41,7 +40,7 @@ class SessionsStorage:
 
                 with open(session_path) as fileobj:
                     auth_key = fileobj.read()
-                
+
                 if len(auth_key) != 353:
                     continue
 
@@ -51,20 +50,28 @@ class SessionsStorage:
                     api_hash,
                     device_model="Redmi Note 10",
                     lang_code="en",
-                    system_lang_code="en"
+                    system_lang_code="en",
                 )
 
                 self.full_sessions[session_path] = session
-        
+
             elif file.endswith(".jsession"):
                 session_path = os.path.join(directory, file)
-                
+
                 with open(session_path) as fileobj:
                     session_settings = json.load(fileobj)
-                
+
                 session = JsonSession(dict_settings=session_settings)
 
-                if self.is_user_id_exists(session.account.account.user_id):
+                if old_session := self.is_user_id_exists(
+                    session.account.account.user_id
+                ):
+                    old_session_path = self.get_session_path(old_session)
+                    session_path = self.get_session_path(session)
+
+                    console.print(
+                        f"[bold yellow]WARNING:[/] Same accounts in botnet — {old_session_path} matches with {session_path}"
+                    )
                     continue
 
                 client = TelegramClient(
@@ -75,7 +82,7 @@ class SessionsStorage:
                     app_version=session.account.application.app_version,
                     system_version=session.account.application.sdk,
                     lang_code=session.account.application.system_lang_code,
-                    system_lang_code=session.account.application.system_lang_code
+                    system_lang_code=session.account.application.system_lang_code,
                 )
 
                 self.json_sessions.append(session)
@@ -83,14 +90,18 @@ class SessionsStorage:
 
         if self.initialize:
             if len(self.full_sessions) == 0:
-                return print("In order for the botnet to work, you need to add accounts")
+                return print(
+                    "In order for the botnet to work, you need to add accounts"
+                )
 
             with console.status("Initializing..."):
                 asyncio.get_event_loop().run_until_complete(
-                    asyncio.gather(*[
-                        self.check_session(session, path)
-                        for path, session in self.full_sessions.items()
-                    ])
+                    asyncio.gather(
+                        *[
+                            self.check_session(session, path)
+                            for path, session in self.full_sessions.items()
+                        ]
+                    )
                 )
 
     async def check_session(self, session: TelegramClient, path: str):
@@ -109,10 +120,10 @@ class SessionsStorage:
             del self.full_sessions[path]
             os.remove(path)
             return
-        
+
         console.log(f"Initialized {path}")
 
-    def get_session_path(self, session: TelegramClient) -> str:
+    def get_session_path(self, session: TelegramClient | JsonSession) -> str:
         for path, client in self.full_sessions.items():
             if client == session:
                 return path
@@ -120,7 +131,7 @@ class SessionsStorage:
     def is_user_id_exists(self, user_id: int) -> bool:
         for session in self.json_sessions:
             if session.account.account.user_id == user_id:
-                return True
+                return session
 
         return False
 
