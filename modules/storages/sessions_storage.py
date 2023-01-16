@@ -67,9 +67,7 @@ class SessionsStorage:
                 if old_session := self.is_user_id_exists(
                     session.account.account.user_id
                 ):
-                    #if old_session.account.account.added_at != session.account.account.added_at:
                     old_session_path = self.get_json_session_path(old_session)
-                    session_path = self.get_json_session_path(session)
 
                     console.print(
                         f"[bold yellow]WARNING:[/] Same accounts in botnet — {old_session_path} matches with {session_path}"
