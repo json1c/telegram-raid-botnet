@@ -63,13 +63,11 @@ class SessionsStorage:
                     session_settings = json.load(fileobj)
 
                 session = JsonSession(dict_settings=session_settings)
-                
-                self.json_sessions.append(session)
-                self.jsessions_paths[session_path] = session
 
                 if old_session := self.is_user_id_exists(
                     session.account.account.user_id
                 ):
+                    #if old_session.account.account.added_at != session.account.account.added_at:
                     old_session_path = self.get_json_session_path(old_session)
                     session_path = self.get_json_session_path(session)
 
@@ -91,6 +89,8 @@ class SessionsStorage:
                 )
                 
                 self.full_sessions[session_path] = client
+                self.json_sessions.append(session)
+                self.jsessions_paths[session_path] = session
 
         if self.initialize:
             if len(self.full_sessions) == 0:
@@ -137,7 +137,7 @@ class SessionsStorage:
             if json_session == json_session_:
                 return path
 
-    def is_user_id_exists(self, user_id: int) -> bool:
+    def is_user_id_exists(self, user_id: int) -> bool | JsonSession:
         for session in self.json_sessions:
             if session.account.account.user_id == user_id:
                 return session
