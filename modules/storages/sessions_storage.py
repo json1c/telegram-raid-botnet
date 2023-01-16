@@ -64,6 +64,9 @@ class SessionsStorage:
                 
                 session = JsonSession(dict_settings=session_settings)
 
+                if self.is_user_id_exists(session.account.account.user_id):
+                    continue
+
                 client = TelegramClient(
                     session=StringSession(session.account.auth_key),
                     api_id=session.account.application.api_id,
@@ -113,6 +116,13 @@ class SessionsStorage:
         for path, client in self.full_sessions.items():
             if client == session:
                 return path
+
+    def is_user_id_exists(self, user_id: int) -> bool:
+        for session in self.json_sessions:
+            if session.account.account.user_id == user_id:
+                return True
+
+        return False
 
     @property
     def sessions(self) -> List[TelegramClient]:
