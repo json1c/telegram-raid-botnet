@@ -31,7 +31,10 @@ class PmFloodFunc(TelethonFunction):
         errors = 0
 
         async with self.storage.ainitialize_session(session):
-            me = await session.get_me()
+            try:
+                me = await session.get_me()
+            except:
+                return
             
             if by_phone_number:
                 result = await session(functions.contacts.ImportContactsRequest(
