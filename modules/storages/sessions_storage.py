@@ -31,6 +31,7 @@ class SessionsStorage:
     def __init__(self, directory: str, api_id: Union[str, int], api_hash: str):
         self.full_sessions: Dict[str, Union[TelegramClient, JsonSession]] = {}
         self.json_sessions: List[JsonSession] = []
+        self.jsessions_paths: Dict[str, JsonSession] = {}
 
         self.initialize = True if input("Initialize sessions? (y/n) ") == "y" else False
 
@@ -62,16 +63,21 @@ class SessionsStorage:
                     session_settings = json.load(fileobj)
 
                 session = JsonSession(dict_settings=session_settings)
+                
+                self.json_sessions.append(session)
+                self.full_sessions[session_path] = client
+                self.jsessions_paths[session_path] = session
 
                 if old_session := self.is_user_id_exists(
                     session.account.account.user_id
                 ):
-                    old_session_path = self.get_session_path(old_session)
-                    session_path = self.get_session_path(session)
+                    old_session_path = self.get_json_session_path(old_session)
+                    session_path = self.get_json_session_path(session)
 
                     console.print(
                         f"[bold yellow]WARNING:[/] Same accounts in botnet — {old_session_path} matches with {session_path}"
                     )
+
                     continue
 
                 client = TelegramClient(
@@ -84,9 +90,6 @@ class SessionsStorage:
                     lang_code=session.account.application.system_lang_code,
                     system_lang_code=session.account.application.system_lang_code,
                 )
-
-                self.json_sessions.append(session)
-                self.full_sessions[session_path] = client
 
         if self.initialize:
             if len(self.full_sessions) == 0:
@@ -126,6 +129,11 @@ class SessionsStorage:
     def get_session_path(self, session: TelegramClient | JsonSession) -> str:
         for path, client in self.full_sessions.items():
             if client == session:
+                return path
+    
+    def get_json_session_path(self, json_session_: TelegramClient | JsonSession) -> str:
+        for path, json_session in self.full_sessions.items():
+            if json_session == json_session_:
                 return path
 
     def is_user_id_exists(self, user_id: int) -> bool:
