@@ -133,7 +133,7 @@ class SessionsStorage:
                 return path
     
     def get_json_session_path(self, json_session_: TelegramClient | JsonSession) -> str:
-        for path, json_session in self.full_sessions.items():
+        for path, json_session in self.json_sessions.items():
             if json_session == json_session_:
                 return path
 
