@@ -12,14 +12,16 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-from pytgcalls import idle
-from pytgcalls.types import AudioPiped, VideoPiped, AudioVideoPiped, AudioImagePiped, LowQualityVideo
-from pytgcalls import PyTgCalls
-from telethon import utils
+
+from pytgcalls import PyTgCalls, idle
+from pytgcalls.types import (AudioImagePiped, AudioPiped, AudioVideoPiped,
+                             LowQualityVideo, VideoPiped)
 from rich.console import Console
+from telethon import utils
 from youtube_dl import YoutubeDL
 
 from functions.base import TelethonFunction
+
 console = Console()
 
 
@@ -80,15 +82,10 @@ class VoicePlayFunc(TelethonFunction):
                         break
             
             elif self.format_choice == "2":
-                for rformat in r["formats"]:
-                    if "144" in rformat["format"]:
-                        print(rformat)
-                        self.media_url = rformat["url"]
-                        break
+                self.media_url = r["formats"][-1]["url"]
         
         elif source_choice == "2":
             self.media_url = console.input("[bold red]media url> [/]")
-
 
         await asyncio.gather(*[
             self.join_and_play(session)

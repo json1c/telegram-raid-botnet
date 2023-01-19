@@ -45,7 +45,7 @@ class SessionsStorage:
                 if len(auth_key) != 353:
                     continue
 
-                session = TelegramClient(
+                client = TelegramClient(
                     StringSession(auth_key),
                     api_id,
                     api_hash,
@@ -54,7 +54,7 @@ class SessionsStorage:
                     system_lang_code="en",
                 )
 
-                self.full_sessions[session_path] = session
+                self.full_sessions[session_path] = client
 
             elif file.endswith(".jsession"):
                 session_path = os.path.join(directory, file)
@@ -84,8 +84,10 @@ class SessionsStorage:
                     system_version=session.account.application.sdk,
                     lang_code=session.account.application.system_lang_code,
                     system_lang_code=session.account.application.system_lang_code,
+                    proxy=session.account.proxy.as_telethon()
+                    if session.account.proxy else None,
                 )
-                
+
                 self.full_sessions[session_path] = client
                 self.json_sessions.append(session)
                 self.jsessions_paths[session_path] = session
@@ -111,6 +113,17 @@ class SessionsStorage:
 
         try:
             await session.connect()
+        except ConnectionError:
+            json_session = self.jsessions_paths.get("path")
+            
+            if json_session is not None:
+                if json_session.account.proxy is not None:
+                    return console.log(
+                        f"Error with connection to session {path}. Maybe proxy {json_session.account.proxy.ip} is dead?"
+                    )
+
+            console.log(f"Error with connection to session {path}")
+
         except Exception as err:
             console.log(f"Session {path} returned error. {err}. Removing.")
             del self.full_sessions[path]
@@ -129,7 +142,7 @@ class SessionsStorage:
         for path, client in self.full_sessions.items():
             if client == session:
                 return path
-    
+
     def get_json_session_path(self, json_session_: TelegramClient | JsonSession) -> str:
         for path, json_session in self.jsessions_paths.items():
             if json_session == json_session_:

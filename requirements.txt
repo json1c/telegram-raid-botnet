@@ -8,3 +8,4 @@ gitpython
 phonenumbers
 pyrogram
 tgcrypto
+python-socks[asyncio]

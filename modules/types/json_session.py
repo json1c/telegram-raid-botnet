@@ -11,21 +11,22 @@
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import random
-import json
 import dataclasses
+import json
+import random
+from datetime import datetime
+from typing import Any
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-from typing import Any
-from datetime import datetime
 
 from modules.generators.application import Application
 from modules.generators.linux import LinuxAPI
 from modules.generators.telegram_android import TelegramAppAPI
 from modules.types.account import Account
-from modules.types.application import Application
 from modules.types.account_settings import AccountSettings
+from modules.types.application import Application
+from modules.types.proxy import Proxy
 
 
 class JsonSession:    
@@ -43,6 +44,7 @@ class JsonSession:
     @staticmethod
     async def create_application_session(
         generator: Application | Any = None,
+        proxy: Proxy | Any = None,
         api_hash: str | Any = None,
         api_id: str | Any = None,
         device_name: str | Any = None,
@@ -68,7 +70,8 @@ class JsonSession:
             app_version=app_version,
             system_version=sdk,
             lang_code=system_lang_code,
-            system_lang_code=system_lang_code
+            system_lang_code=system_lang_code,
+            proxy=proxy.as_telethon() if proxy else None
         ) as client:
             account = await client.get_me()
 
@@ -89,7 +92,8 @@ class JsonSession:
                     sdk=sdk,
                     lang_pack=lang_pack,
                     system_lang_code=system_lang_code,
-                )
+                ),
+                proxy=proxy
             )
 
             with open(f"{account.phone}.jsession", "w") as file:
