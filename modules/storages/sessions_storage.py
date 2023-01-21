@@ -64,8 +64,8 @@ class SessionsStorage:
 
                 session = JsonSession(dict_settings=session_settings)
 
-                if old_session := self.is_user_id_exists(
-                    session.account.account.user_id
+                if old_session := self.is_phone_exists(
+                    session.account.account.phone_number
                 ):
                     old_session_path = self.get_json_session_path(old_session)
 
@@ -148,9 +148,9 @@ class SessionsStorage:
             if json_session == json_session_:
                 return path
 
-    def is_user_id_exists(self, user_id: int) -> bool | JsonSession:
+    def is_phone_exists(self, phone: int) -> bool | JsonSession:
         for session in self.json_sessions:
-            if session.account.account.user_id == user_id:
+            if session.account.account.phone_number == phone:
                 return session
 
         return False
