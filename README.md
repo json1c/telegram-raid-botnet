@@ -2,7 +2,7 @@
 
 ### Ботнет для рейд атак в Telegram
 
-**Инструкция по установке: https://telegra.ph/Kak-zapustit-botnet-10-29**
+**Инструкция по установке: https://teletype.in/@lkqas/telegram-raid-botnet**
 
 
 ## License
