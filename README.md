@@ -1,9 +1,12 @@
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjson1c%2Ftelegram-raid-botnet.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjson1c%2Ftelegram-raid-botnet?ref=badge_shield)
+# Ботнет для рейд атак в Telegram
+Инструкция по установке: https://teletype.in/@lkqas/telegram-raid-botnet
+<br>
+Разработчик: [@json1c](https://t.me/json1c)
 
-### Ботнет для рейд атак в Telegram
+# Проект больше не обновляется
+К сожалению, из-за отсутствия интереса я больше не хочу обновлять этот проект.
+<br>
+Будет только поддержка работы ботнета и обновлений библиотек.
 
-**Инструкция по установке: https://teletype.in/@lkqas/telegram-raid-botnet**
+Из нового функционала - делаю только приватные функции. Если хотите купить или заказать разработку какой-то определенной функции, которой еще нет - пишите [@json1c](https://t.me/json1c)
 
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjson1c%2Ftelegram-raid-botnet.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjson1c%2Ftelegram-raid-botnet?ref=badge_large)
